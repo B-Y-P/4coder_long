@@ -327,6 +327,7 @@
 // [ ] Compress jump highlight and error highlight into one
 // [ ] Change the margin style
 // [ ] Slider
+// [X] Digit coloring for floats
 
 //- Line Wrap/Overflow
 // [ ] Weird wrap postion
@@ -346,10 +347,61 @@
 // [ ] Correct MC cursors while enabling virtual whitespace
 // [ ] Copy in MC mode -> Exit and re-enter MC mode -> Paste in MC mode
 // [ ] Special UI to know that MC mode is on (cursor color, cursor count, file bar, etc)
+// [X] Align command (https://x.com/stewartlynch8/status/1867572835352183011)
 // [ ] Handle special commands (re: commented bindings in Long_Binding_MultiCursor)
 //     [ ] Jupming commands
 //     [ ] Query bar commands
 //     [ ] Others
+
+//~ TODO LIST/SEARCH/QUERY
+// [ ] Remove the *search* buffer concept
+//     [ ] Custom Search_State structure that stores the current jump rather than View_ID
+//     [ ] Command to serialize the runtime state to a buffer
+//     [ ] long_go_to_definition in readonly and non-code buffer (replacing if_read_only_goto_position)
+//     [ ] Draw minor highlighted matches for inactive view
+//     [ ] Fix incorrect highlight range when search for text that contains whitespace in virtual whitespace
+// [ ] Compress Isearch/Query/Replace/List
+//     [ ] Compress all highlight rendering
+//     [ ] Highlight all matches for Isearch interactively
+//     [ ] Interactively change the search query for ListAllLocations
+//     [ ] Replace as a special mode to switch from/to in search mode
+// [X] Different prompt name for different replace commands
+
+//~ TODO LISTER
+
+//- High Priority
+// [ ] Replace wildcard searching in the query bar and lister with fuzzy search (spaces only)
+// [ ] Has a lister for important but rarely used commands
+// [ ] Run commands while in lister
+// [ ] Put ... after overflow items
+
+//- Setting Lister
+// HUD-style like @flyingsolomon and RADDBG (with sliders)
+// https://discord.com/channels/657067375681863699/657318502012551190/1361868722347708597
+
+// [ ] Global Settings
+//     [ ] Cursor (mode, roundness, thickness, toggle mouse)
+//     [ ] Lister roundess
+//     [ ] Font size
+//     [ ] use_xxx (filebar, error/jump/scope highlight, paren helper, comment keywords)
+//     [ ] show_xxx (line number/offset, fps)
+//     [ ] enable_xxx (output/code wrapping, undo fade, virtual whitespace)
+//     [ ] long_global_move_side
+//     [ ] long_lister_tooltip_peek
+//     [ ] Pos-Context: draw position and enable
+// [ ] Buffer Settings
+//     [ ] Whitespace Highlight
+//     [ ] File Bar
+//     [ ] Font size
+//     [ ] Buffer Info (name, size, line/word/identifier count)
+
+//- Low Priority
+// [ ] Hotkeys for inserting and cycling through common tags
+// [ ] Search for definitions like Hoogle
+// [ ] Has syntax highlight inside each item's contents
+// [ ] Improve relative path display in the file lister
+// [ ] Render multi-column grid like byp_qol
+// [ ] Exit lister with sub lister for dirty buffers
 
 //~ TODO BUGS
 // [ ] Fix undo/redo_all_buffers right after saving bug
@@ -357,31 +409,8 @@
 // [ ] The cursor doesn't get snapped into view when overlaps with the file bar
 // [ ] Fix incorrect pos-context rect after modifying string
 
-//~ @CONSIDER LISTER
-
-//- SEARCH
-// [ ] Replace wildcard searching in the query bar and lister with fuzzy search (spaces only)
-// [ ] Search for definitions like Hoogle
-// [ ] Has a lister for important but rarely used commands
-// [ ] Hotkeys for inserting and cycling through common tags
-// [ ] Run commands while in lister
-
-//- RENDER
-// [ ] Put ... after overflow items
-// [ ] Has syntax highlight inside each item's contents
-// [ ] Improve relative path display in the file lister
-// [ ] Render multi-column grid like byp_qol
-// [ ] Exit lister with sub lister for dirty buffers
-
-//~ @CONSIDER FPS HUD
-// [ ] More detailed stats
-// [ ] Pause-Resume
-// [ ] Position (Top-Left, Top-Right, Bot-Left, Bot-Right)
-
 //~ @CONSIDER NEW SYSTEM
-// [ ] LOC counter
 // [ ] Virtual column
-// [ ] Jump system
 // [ ] Lister + Query Bar: https://discord.com/channels/657067375681863699/657067375681863703/1363439846793679088
 
 //~ @CONSIDER Interesting but low-priority stuff that may or may not be useful but deserves a look
@@ -406,11 +435,19 @@
 // [ ] Quick open folder
 //     [ ] 4coder source code
 //     [ ] Reference
+// [ ] open_matching_file let you choose between c and cpp
+// [ ] Execute CLI should push the *run* buffer to *messages*
+// [ ] Add the concept of tes files to the project file (file's notes won't be leaked to the rest of the codebase)
+
+//- Movement
+// [ ] Move range selection up and down
+// [ ] Jump to location with relative path
+// [X] Move left/right alpha_numeric in string/comment
+// [X] long_select_surrounding_scope should select inner first
+// [X] long_paste_and_replace_range shouldn't change the cursor position
 
 //- MISC
-// [ ] Move range selection up and down
 // [ ] Modal auto-complete {} () [] on enter or typing
-// [ ] Jump to location with relative path
 // [ ] Code peek yank
 // [ ] Greedy lookup the binding commands
 

@@ -1859,6 +1859,48 @@ CUSTOM_DOC("[MC] begins multi-cursor using cursor-mark block-rect")
     }
 }
 
+CUSTOM_COMMAND_SIG(long_mc_align)
+CUSTOM_DOC("Align every cursor to the largest column.")
+{
+    if (mc_context.active_cursor)
+        return;
+    
+    View_ID view = get_active_view(app, 0);
+    Buffer_ID buffer = view_get_buffer(app, view, Access_Write);
+    if (!buffer)
+        return;
+    
+    // TODO(long): Abstract this out as a helper
+    MC_Command_Kind kind = MC_Command_Global;
+    MC_Node prev = {mc_context.cursors};
+    Long_MC_Pull(app, mc_context.view, kind, &prev);
+    mc_context.cursors = &prev;
+    
+    i64 max_col = 0;
+    for_mc(node, &prev)
+    {
+        Buffer_Cursor cursor = view_compute_cursor(app, view, seek_pos(node->cursor_pos));
+        if (cursor.col > max_col)
+            max_col = cursor.col;
+    }
+    
+    for_mc(node, &prev)
+    {
+        Scratch_Block scratch(app);
+        Buffer_Cursor cursor = view_compute_cursor(app, view, seek_pos(node->cursor_pos));
+        i64 diff = max_col - cursor.col;
+        
+        if (diff)
+        {
+            String8 str = push_stringf(scratch, "%*s", diff, "");
+            buffer_replace_range(app, buffer, Ii64(node->cursor_pos), str);
+        }
+    }
+    
+    mc_context.cursors = prev.next;
+    Long_MC_Push(app, mc_context.view, kind, &prev);
+}
+
 // @COPYPASTA(long): if_read_only_goto_position
 CUSTOM_COMMAND_SIG(long_if_read_only_goto_position)
 CUSTOM_DOC("If the buffer in the active view is writable, inserts a character, otherwise performs goto_jump_at_cursor if the editor isn't in multi-cursor mode.")
@@ -2468,7 +2510,7 @@ function void Long_Query_ReplaceRange(Application_Links* app, View_ID view, Rang
     b32 select_all = 0;
     String8 replace = {};
     
-    Query_Bar* bar = Long_Query_ReserveBar(app, scratch, "Replace: ", {});
+    Query_Bar* bar = Long_Query_ReserveBar(app, scratch, "Replace Range: ", {});
     if (bar)
     {
         Rect_f32 bounds = Long_Camera_PushBounds(app, view);
@@ -2599,7 +2641,7 @@ CUSTOM_DOC("Queries the user for a needle and string. Replaces all occurences of
     Scratch_Block scratch(app);
     Query_Bar_Group group(app);
     
-    String8 replace_str = Long_Query_String(app, scratch, "Replace: ", {});
+    String8 replace_str = Long_Query_String(app, scratch, "Replace All: ", {});
     if (!replace_str.size)
         return;
     
@@ -3175,12 +3217,21 @@ CUSTOM_DOC("replace the text between the mark and the cursor with the text from 
             if (string.size > 0)
             {
                 Buffer_ID buffer = view_get_buffer(app, view, Access_ReadWriteVisible);
-                Range_i64 range = get_view_range(app, view);
+                i64 cursor = view_get_cursor_pos(app, view);
+                i64 mark = view_get_mark_pos(app, view);
                 
+                Range_i64 range = Ii64(cursor, mark);
                 buffer_replace_range(app, buffer, range, string);
-                range = Ii64_size(range.min, string.size);
                 
-                view_set_cursor_and_preferred_x(app, view, seek_pos(range.max));
+                range.max = range.min + string.size;
+                i64 new_cursor = range.max;
+                if (cursor < mark)
+                {
+                    view_set_mark(app, view, seek_pos(new_cursor));
+                    new_cursor = range.min;
+                }
+                
+                view_set_cursor_and_preferred_x(app, view, seek_pos(new_cursor));
                 buffer_post_fade(app, buffer, 0.667f, range, Long_ARGBFromID(defcolor_paste));
             }
         }
@@ -3391,6 +3442,21 @@ function void Long_Scan_Delete(Application_Links* app, Scan_Direction direction,
     Long_Scan_Delete(app, Long_Scan_GetSide(direction), direction, func);
 }
 
+global Character_Predicate long_predicate_operator_utf8 = { {
+        0x00, 0x00, 0x00, 0x00, 0xFE, 0xFF, 0x00, 0xFC, 
+        0x01, 0x00, 0x00, 0x78, 0x01, 0x00, 0x00, 0xF8, 
+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+    } };
+
+function i64 Long_Boundary_TextWord(Application_Links* app, Buffer_ID buffer, Side side, Scan_Direction direction, i64 pos)
+{
+    i64 op_pos = boundary_predicate(app, buffer, side, direction, pos, &long_predicate_operator_utf8);
+    i64 nw_pos = boundary_alpha_numeric_underscore_utf8(app, buffer, side, direction, pos);
+    i64 result = direction == Scan_Forward ? Min(nw_pos, op_pos) : Max(nw_pos, op_pos);
+    return result;
+}
+
 function i64 Long_Boundary_TokenAndWhitespace(Application_Links* app, Buffer_ID buffer, 
                                               Side side, Scan_Direction direction, i64 pos)
 {
@@ -3408,7 +3474,7 @@ function i64 Long_Boundary_TokenAndWhitespace(Application_Links* app, Buffer_ID 
     i64 result = direction == Scan_Forward ? buffer_get_size(app, buffer) : 0;
     Token_Array tokens = get_token_array_from_buffer(app, buffer);
     if (!tokens.tokens)
-        result = boundary_non_whitespace(app, buffer, side, direction, pos);
+        result = Long_Boundary_TextWord(app, buffer, side, direction, pos);
     
     else if (tokens.count > 1)
     {
@@ -3426,10 +3492,9 @@ function i64 Long_Boundary_TokenAndWhitespace(Application_Links* app, Buffer_ID 
                     token = token_it_read(&it);
                 }
                 
-                // TODO(long): DSL Comments/Strings
                 if (token->kind == TokenBaseKind_Comment || token->kind == TokenBaseKind_LiteralString)
                 {
-                    result = boundary_non_whitespace(app, buffer, side, direction, pos);
+                    result = Long_Boundary_TextWord(app, buffer, side, direction, pos);
                     result = clamp_top(result, token->pos + token->size);
                 }
                 
@@ -3473,10 +3538,9 @@ function i64 Long_Boundary_TokenAndWhitespace(Application_Links* app, Buffer_ID 
                         token = token2;
                 }
                 
-                // TODO(long): DSL Comments/Strings
                 if ((token->kind == TokenBaseKind_Comment || token->kind == TokenBaseKind_LiteralString) && pos > token->pos)
                 {
-                    result = boundary_non_whitespace(app, buffer, side, direction, pos);
+                    result = Long_Boundary_TextWord(app, buffer, side, direction, pos);
                     result = clamp_bot(result, token->pos);
                 }
                 
@@ -4043,6 +4107,18 @@ CUSTOM_DOC("Find the first child scope that starts inside the current selected s
         select_scope(app, view, range);
 }
 
+function b32 Long_Scope_IsSelection(Application_Links* app, Buffer_ID buffer, Range_i64 range)
+{
+    b32 result = 0;
+    i64 end = 0;
+    Find_Nest_Flag flags = FindNest_Scope|FindNest_Balanced|FindNest_EndOfToken;
+    
+    if (buffer_get_char(app, buffer, range.min) == '{')
+        if (find_nest_side(app, buffer, range.min + 1, flags, Scan_Forward, NestDelim_Close, &end))
+            result = end == range.max;
+    return result;
+}
+
 CUSTOM_COMMAND_SIG(long_select_surrounding_scope)
 CUSTOM_DOC("Select the surrounding scope.")
 {
@@ -4053,18 +4129,24 @@ CUSTOM_DOC("Select the surrounding scope.")
     i64 advance = cursor < mark ? 1 : -1;
     Range_i64 range = Ii64(cursor, mark);
     
-    if (range_is_scope_selection(app, buffer, range))
+    if (Long_Scope_IsSelection(app, buffer, range))
     {
         view_set_cursor(app, view, seek_pos(cursor + advance));
         view_set_mark  (app, view, seek_pos(mark   - advance));
     }
-    else if (range_is_scope_selection(app, buffer, { range.min - 1, range.max + 1 }))
+    
+    else if (Long_Scope_IsSelection(app, buffer, Ii64(range.min - 1, range.max + 1)))
     {
         view_set_cursor(app, view, seek_pos(cursor - advance));
         view_set_mark  (app, view, seek_pos(mark   + advance));
     }
-    else
-        select_surrounding_scope(app);
+    
+    else if (find_surrounding_nest(app, buffer, cursor, FindNest_Scope, &range))
+    {
+        select_scope   (app, view, range);
+        view_set_cursor(app, view, seek_pos(range.min + 1));
+        view_set_mark  (app, view, seek_pos(range.max - 1));
+    }
 }
 
 //~ NOTE(long): Build Commands

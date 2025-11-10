@@ -248,24 +248,6 @@ function void Long_Tick(Application_Links* app, Frame_Info frame)
 
 //~ NOTE(long): Render Hooks
 
-//- GLOBAL
-// mode, bind_by_physical_key
-// use_file_bars, use_error_highlight, use_jump_highlight, use_scope_highlight, use_paren_helper, use_comment_keywords
-// show_line_number_margins, long_show_line_number_offset, enable_output_wrapping (?), enable_undo_fade_out
-// cursor_roundness, mark_thickness, lister_roundness
-// enable_virtual_whitespace, virtual_whitespace_regular_indent, enable_code_wrapping
-// toggle_mouse, show_fps_hud, global face size
-
-//- BUFFER
-// toggle_show_whitespace, toggle_file_bar, fps
-// buffer face size, buffer name, buffer size, line count, current location (row/col/pos)
-
-//- LONG
-// long_global_move_side
-// f4_poscontext_draw_at_bottom_of_buffer, long_global_pos_context_open
-// long_global_child_tooltip_count, long_active_pos_context_option
-// long_lister_tooltip_peek
-
 function void Long_Render(Application_Links* app, Frame_Info frame, View_ID view)
 {
 #ifdef FCODER_FLEURY_RECENT_FILES_H

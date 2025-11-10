@@ -157,6 +157,7 @@ keys_file =
     { "long_mc_begin_multi_block",             "L", "Control", "Shift" },
     { "long_mc_up_trail",                     "Up",     "Alt", "Shift" },
     { "long_mc_down_trail",                 "Down",     "Alt", "Shift" },
+    { "long_mc_align",                         "A",     "Alt"          },
     
     // NOTE(long): These must be below Alt+Shift
     { "long_move_to_prev_function_and_type",  "Up", "Control", "Shift", "Alt" },

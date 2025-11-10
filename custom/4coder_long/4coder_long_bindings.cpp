@@ -195,7 +195,6 @@ function void Long_Binding_SetupDefault(Mapping* mapping)
         //- Mark
         Bind(set_mark,                          KeyCode_Space, KeyCode_Control);
         Bind(long_cursor_mark_swap,             KeyCode_Space, KeyCode_Control, KeyCode_Shift);
-        Bind(long_clean_whitespace_at_cursor,       KeyCode_B, KeyCode_Control); // @RECONSIDER(long)
         
         //- Multi cursors
         Bind(MC_add_at_pos,             KeyCode_BackwardSlash, KeyCode_Control, KeyCode_Shift);
@@ -203,6 +202,7 @@ function void Long_Binding_SetupDefault(Mapping* mapping)
         Bind(long_mc_begin_multi_block,             KeyCode_L, KeyCode_Control, KeyCode_Shift);
         Bind(long_mc_up_trail,                     KeyCode_Up, KeyCode_Alt, KeyCode_Shift);
         Bind(long_mc_down_trail,                 KeyCode_Down, KeyCode_Alt, KeyCode_Shift);
+        Bind(long_mc_align,                         KeyCode_A, KeyCode_Alt);
         
         // NOTE(long): These must be below Alt+Shift
         Bind(long_move_to_prev_function_and_type,  KeyCode_Up, KeyCode_Control, KeyCode_Shift, KeyCode_Alt);
@@ -306,6 +306,7 @@ function void Long_Binding_MultiCursor()
         MC_register(long_mc_up_trail,                MC_Command_Global);
         MC_register(long_mc_down_trail,              MC_Command_Global);
         MC_register(long_mc_begin_multi_block,       MC_Command_Global);
+        MC_register(long_mc_align,                   MC_Command_Global);
     }
     
     //~ NOTE(long): Global
@@ -469,7 +470,6 @@ function void Long_Binding_MultiCursor()
         //- Mark
         MC_register(set_mark,                              MC_Command_Cursor);
         MC_register(long_cursor_mark_swap,                 MC_Command_Cursor);
-        MC_register(long_clean_whitespace_at_cursor,       MC_Command_Cursor);
         
         //- Replace
 #if 0

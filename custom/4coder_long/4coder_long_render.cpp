@@ -1417,6 +1417,7 @@ function void Long_MC_DrawHighlights(Long_Render_Context* ctx)
                 if (range_contains(ctx->visible_range, markers[i].pos))
                     Long_Render_DrawBlock(ctx, Ii64_size(markers[i].pos, size), token_color);
             
+            // This is for selected ranges
             for_mc(node, mc_context.cursors)
                 Long_Render_HighlightBlock(ctx, Ii64(node->cursor_pos, node->mark_pos), .75f);
             Long_Render_HighlightBlock(ctx, Ii64(cursor, mark));
@@ -1990,14 +1991,21 @@ function void Long_Syntax_Highlight(Long_Render_Context* ctx)
         }
         
         // NOTE(long): RADDBG-style alternative digit group
-        else if (token->kind == TokenBaseKind_LiteralInteger && token->size >= 3 && character_is_base10(lexeme.str[0]))
+        else if ((token->kind == TokenBaseKind_LiteralInteger || token->kind == TokenBaseKind_LiteralFloat) &&
+                 token->size >= 3 && character_is_base10(lexeme.str[0]))
         {
             // @CONSIDER(long): C-like octal
             b32 has_prefix = lexeme.str[0] == '0' && character_is_alpha(lexeme.str[1]);
+            
             u64 suffix_pos = 0;
             for (u64 i = has_prefix ? 2 : 1; i < lexeme.size && !suffix_pos; ++i)
-                if (character_to_lower(lexeme.str[i]) > 'f')
+            {
+                char c = lexeme.str[i];
+                if (token->kind == TokenBaseKind_LiteralFloat && !character_is_base10(c))
                     suffix_pos = i;
+                else if (character_to_lower(c) > 'f')
+                    suffix_pos = i;
+            }
             
             i64 chunk_size = has_prefix ? 4 : 3;
             ARGB_Color colors[] = { argb, color_blend(default_color, t, alt_int_color) };
