@@ -12,6 +12,15 @@ function void Long_Lister_AddItem(Application_Links* app, Lister* lister, String
     ((Lister_Node*)data - 1)->user_data = data;
 }
 
+function void Long_Lister_AddVars(Application_Links* app, Lister* lister, String8 name)
+{
+    Long_Lister_Data* data = (Long_Lister_Data*)lister_add_item(lister, name, string_u8_empty, 0, sizeof(Long_Lister_Data));
+    *data = {};
+    data->type = Long_Content_Vars;
+    data->user_index = (i64)vars_save_string(name);
+    ((Lister_Node*)data - 1)->user_data = data;
+}
+
 function void Long_Lister_AddBuffer(Application_Links* app, Lister* lister, String8 name, String8 tag, Buffer_ID buffer)
 {
     Long_Lister_Data* data = (Long_Lister_Data*)lister_add_item(lister, name, tag, 0, sizeof(Long_Lister_Data));
@@ -300,6 +309,16 @@ function void Long_Lister_RenderHUD(Long_Render_Context* ctx, Lister* lister, b3
         Long_Render_SetClip(app, list_rect);
         Long_Render_BorderRect(app, item_outer, margin_size, lister_roundness,
                                Long_ARGBFromID(item_colors[highlight], 1), Long_ARGBFromID(item_colors[highlight], 0));
+        
+        Long_Lister_Data* config = (Long_Lister_Data*)node->user_data;
+        if (config == (Long_Lister_Data*)(node + 1) && config->type == Long_Content_Vars)
+        {
+            b32 value = def_get_config_b32(config->user_index);
+            
+            Rect_f32 slider_rect = rect_inner(item_inner, margin_size * 2);
+            slider_rect.x0 = slider_rect.x1 - rect_height(slider_rect) * 2.f;
+            Long_Render_SliderB32(app, slider_rect, value);
+        }
         
         //- NOTE(long): Item Content
         Fancy_Line line = {};
@@ -821,7 +840,27 @@ function Lister_Result Long_Lister_Run(Application_Links* app, Lister* lister, b
         }
         
         if (result == ListerActivation_Finished)
+        {
+#if 0
+            Long_Lister_Data* data = (Long_Lister_Data*)lister->out.user_data;
+            
+            // @COPYPASTA(long): lister_get_user_data
+            Lister_Node* node = lister->options.first;
+            for (; node; node = node->next)
+                if (data == node->user_data)
+                    break;
+            
+            if (data == (Long_Lister_Data*)(node + 1) && data->type == Long_Content_Vars)
+            {
+                String_ID config_id = (String_ID)data->user_index;
+                def_set_config_b32(config_id, !def_get_config_b32(config_id));
+            }
+            else break;
+            
+#else
             break;
+#endif
+        }
         
         if (!handled)
         {

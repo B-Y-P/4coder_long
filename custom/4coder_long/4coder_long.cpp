@@ -327,7 +327,6 @@
 // [ ] Compress jump highlight and error highlight into one
 // [ ] Change the margin style
 // [ ] Slider
-// [X] Digit coloring for floats
 
 //- Line Wrap/Overflow
 // [ ] Weird wrap postion
@@ -347,7 +346,6 @@
 // [ ] Correct MC cursors while enabling virtual whitespace
 // [ ] Copy in MC mode -> Exit and re-enter MC mode -> Paste in MC mode
 // [ ] Special UI to know that MC mode is on (cursor color, cursor count, file bar, etc)
-// [X] Align command (https://x.com/stewartlynch8/status/1867572835352183011)
 // [ ] Handle special commands (re: commented bindings in Long_Binding_MultiCursor)
 //     [ ] Jupming commands
 //     [ ] Query bar commands
@@ -365,7 +363,6 @@
 //     [ ] Highlight all matches for Isearch interactively
 //     [ ] Interactively change the search query for ListAllLocations
 //     [ ] Replace as a special mode to switch from/to in search mode
-// [X] Different prompt name for different replace commands
 
 //~ TODO LISTER
 
@@ -383,9 +380,9 @@
 //     [ ] Cursor (mode, roundness, thickness, toggle mouse)
 //     [ ] Lister roundess
 //     [ ] Font size
-//     [ ] use_xxx (filebar, error/jump/scope highlight, paren helper, comment keywords)
-//     [ ] show_xxx (line number/offset, fps)
-//     [ ] enable_xxx (output/code wrapping, undo fade, virtual whitespace)
+//     [X] use_xxx (filebar, error/jump/scope highlight, paren helper, comment keywords)
+//     [X] show_xxx (line number/offset, fps)
+//     [X] enable_xxx (output/code wrapping, undo fade, virtual whitespace)
 //     [ ] long_global_move_side
 //     [ ] long_lister_tooltip_peek
 //     [ ] Pos-Context: draw position and enable
@@ -442,9 +439,6 @@
 //- Movement
 // [ ] Move range selection up and down
 // [ ] Jump to location with relative path
-// [X] Move left/right alpha_numeric in string/comment
-// [X] long_select_surrounding_scope should select inner first
-// [X] long_paste_and_replace_range shouldn't change the cursor position
 
 //- MISC
 // [ ] Modal auto-complete {} () [] on enter or typing

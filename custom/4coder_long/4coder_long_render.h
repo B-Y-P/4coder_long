@@ -23,6 +23,10 @@ struct Long_Render_Context
     Face_Metrics metrics;
 };
 
+CUSTOM_ID(colors, long_color_slider_back);
+CUSTOM_ID(colors, long_color_slider_border);
+CUSTOM_ID(colors, long_color_slider_text);
+
 #define Long_Render_CtxBlock(ctx, ...) \
     for (Long_Render_Context _rst_ = *(ctx), *_i_ = (__VA_ARGS__, (ctx)); _i_; _i_ = 0, *(ctx) = _rst_)
 

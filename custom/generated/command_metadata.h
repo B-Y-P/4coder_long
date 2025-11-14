@@ -2,7 +2,7 @@
 #define command_id(c) (fcoder_metacmd_ID_##c)
 #define command_metadata(c) (&fcoder_metacmd_table[command_id(c)])
 #define command_metadata_by_id(id) (&fcoder_metacmd_table[id])
-#define command_one_past_last_id 403
+#define command_one_past_last_id 405
 #if defined(CUSTOM_COMMAND_SIG)
 #define PROC_LINKS(x,y) x
 #else
@@ -128,6 +128,7 @@ CUSTOM_COMMAND_SIG(load_themes_hot_directory);
 CUSTOM_COMMAND_SIG(long_autocomplete);
 CUSTOM_COMMAND_SIG(long_backspace_alpha_numeric_or_camel);
 CUSTOM_COMMAND_SIG(long_backspace_token);
+CUSTOM_COMMAND_SIG(long_buffer_settings_lister);
 CUSTOM_COMMAND_SIG(long_build_in_build_panel);
 CUSTOM_COMMAND_SIG(long_change_active_panel);
 CUSTOM_COMMAND_SIG(long_change_passive_panel);
@@ -145,6 +146,7 @@ CUSTOM_COMMAND_SIG(long_delete_range);
 CUSTOM_COMMAND_SIG(long_delete_token);
 CUSTOM_COMMAND_SIG(long_execute_any_cli);
 CUSTOM_COMMAND_SIG(long_explorer);
+CUSTOM_COMMAND_SIG(long_global_settings_lister);
 CUSTOM_COMMAND_SIG(long_go_to_definition);
 CUSTOM_COMMAND_SIG(long_go_to_definition_same_panel);
 CUSTOM_COMMAND_SIG(long_history_lister);
@@ -424,7 +426,7 @@ char *source_name;
 i32 source_name_len;
 i32 line_number;
 };
-static Command_Metadata fcoder_metacmd_table[403] = {
+static Command_Metadata fcoder_metacmd_table[405] = {
 { PROC_LINKS(MC_add_at_pos, 0), false, "MC_add_at_pos", 13, "[MC] adds multi-cursor at current pos", 37, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_multi_cursor.cpp", 61, 361 },
 { PROC_LINKS(MC_begin_multi, 0), false, "MC_begin_multi", 14, "[MC] begins multi-cursors", 25, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_multi_cursor.cpp", 61, 374 },
 { PROC_LINKS(MC_begin_multi_block, 0), false, "MC_begin_multi_block", 20, "[MC] begins multi-cursor using cursor-mark block-rect", 53, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_multi_cursor.cpp", 61, 400 },
@@ -485,10 +487,10 @@ static Command_Metadata fcoder_metacmd_table[403] = {
 { PROC_LINKS(execute_any_cli, 0), false, "execute_any_cli", 15, "Queries for an output buffer name and system command, runs the system command as a CLI and prints the output to the specified buffer.", 133, "D:\\Programs\\4coder\\custom\\4coder_cli_command.cpp", 48, 22 },
 { PROC_LINKS(execute_previous_cli, 0), false, "execute_previous_cli", 20, "If the command execute_any_cli has already been used, this will execute a CLI reusing the most recent buffer name and command.", 126, "D:\\Programs\\4coder\\custom\\4coder_cli_command.cpp", 48, 7 },
 { PROC_LINKS(exit_4coder, 0), false, "exit_4coder", 11, "Attempts to close 4coder.", 25, "D:\\Programs\\4coder\\custom\\4coder_base_commands.cpp", 50, 848 },
-{ PROC_LINKS(f4_home_first_non_whitespace, 0), false, "f4_home_first_non_whitespace", 28, "Goes to the beginning of the line.", 34, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 5021 },
-{ PROC_LINKS(f4_open_project, 0), true, "f4_open_project", 15, "Open a project by navigating to the project file.", 49, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4970 },
+{ PROC_LINKS(f4_home_first_non_whitespace, 0), false, "f4_home_first_non_whitespace", 28, "Goes to the beginning of the line.", 34, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 5079 },
+{ PROC_LINKS(f4_open_project, 0), true, "f4_open_project", 15, "Open a project by navigating to the project file.", 49, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 5028 },
 { PROC_LINKS(f4_switch_syntax_option, 0), false, "f4_switch_syntax_option", 23, "Switches the syntax highlighting mode.", 38, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_fleury_colors.cpp", 62, 57 },
-{ PROC_LINKS(f4_unindent, 0), false, "f4_unindent", 11, "Unindent the selected range.", 28, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 5235 },
+{ PROC_LINKS(f4_unindent, 0), false, "f4_unindent", 11, "Unindent the selected range.", 28, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 5293 },
 { PROC_LINKS(go_to_user_directory, 0), false, "go_to_user_directory", 20, "Go to the 4coder user directory", 31, "D:\\Programs\\4coder\\custom\\4coder_config.cpp", 43, 1655 },
 { PROC_LINKS(goto_beginning_of_file, 0), false, "goto_beginning_of_file", 22, "Sets the cursor to the beginning of the file.", 45, "D:\\Programs\\4coder\\custom\\4coder_helper.cpp", 43, 2258 },
 { PROC_LINKS(goto_end_of_file, 0), false, "goto_end_of_file", 16, "Sets the cursor to the end of the file.", 39, "D:\\Programs\\4coder\\custom\\4coder_helper.cpp", 43, 2266 },
@@ -541,9 +543,10 @@ static Command_Metadata fcoder_metacmd_table[403] = {
 { PROC_LINKS(load_theme_current_buffer, 0), false, "load_theme_current_buffer", 25, "Parse the current buffer as a theme file and add the theme to the theme list. If the buffer has a .4coder postfix in it's name, it is removed when the name is saved.", 165, "D:\\Programs\\4coder\\custom\\4coder_config.cpp", 43, 1611 },
 { PROC_LINKS(load_themes_default_folder, 0), false, "load_themes_default_folder", 26, "Loads all the theme files in the default theme folder.", 54, "D:\\Programs\\4coder\\custom\\4coder_default_framework.cpp", 54, 535 },
 { PROC_LINKS(load_themes_hot_directory, 0), false, "load_themes_hot_directory", 25, "Loads all the theme files in the current hot directory.", 55, "D:\\Programs\\4coder\\custom\\4coder_default_framework.cpp", 54, 554 },
-{ PROC_LINKS(long_autocomplete, 0), false, "long_autocomplete", 17, "When not in multi-cursor mode, tries to autocomplete the word currently being typed if such a word is found.", 108, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 5183 },
+{ PROC_LINKS(long_autocomplete, 0), false, "long_autocomplete", 17, "When not in multi-cursor mode, tries to autocomplete the word currently being typed if such a word is found.", 108, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 5241 },
 { PROC_LINKS(long_backspace_alpha_numeric_or_camel, 0), false, "long_backspace_alpha_numeric_or_camel", 37, "Deletes left to a alphanumeric or camel boundary.", 49, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 3673 },
 { PROC_LINKS(long_backspace_token, 0), false, "long_backspace_token", 20, "Deletes left to a token boundary.", 33, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 3614 },
+{ PROC_LINKS(long_buffer_settings_lister, 0), false, "long_buffer_settings_lister", 27, "Lists all global settings", 25, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4936 },
 { PROC_LINKS(long_build_in_build_panel, 0), false, "long_build_in_build_panel", 25, "Looks for a build.bat, build.sh, or makefile in the current and parent directories. Runs the first that it finds and prints the output to *compilation*. Puts the *compilation* buffer in a panel at the footer of the current view.", 228, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4198 },
 { PROC_LINKS(long_change_active_panel, 0), false, "long_change_active_panel", 24, "Change the currently active panel, moving to the panel with the next highest view_id.", 85, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 1285 },
 { PROC_LINKS(long_change_passive_panel, 0), false, "long_change_passive_panel", 25, "Change the currently active panel, moving to the panel with the next highest view_id.", 85, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 1296 },
@@ -561,6 +564,7 @@ static Command_Metadata fcoder_metacmd_table[403] = {
 { PROC_LINKS(long_delete_token, 0), false, "long_delete_token", 17, "Deletes right to a token boundary.", 34, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 3621 },
 { PROC_LINKS(long_execute_any_cli, 0), false, "long_execute_any_cli", 20, "Queries for an output buffer name and system command, runs the system command as a CLI and prints the output to the specified buffer.", 133, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4873 },
 { PROC_LINKS(long_explorer, 0), false, "long_explorer", 13, "Opens file explorer in cmd", 26, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4893 },
+{ PROC_LINKS(long_global_settings_lister, 0), false, "long_global_settings_lister", 27, "Lists all global settings", 25, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4901 },
 { PROC_LINKS(long_go_to_definition, 0), false, "long_go_to_definition", 21, "Goes to the jump location at the cursor or the definition of the identifier under the cursor.", 93, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 2828 },
 { PROC_LINKS(long_go_to_definition_same_panel, 0), false, "long_go_to_definition_same_panel", 32, "Goes to the jump location at the cursor or the definition of the identifier under the cursor in the same panel.", 111, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 2834 },
 { PROC_LINKS(long_history_lister, 0), true, "long_history_lister", 19, "Opens an interactive list of the current buffer history.", 56, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 854 },
@@ -584,8 +588,8 @@ static Command_Metadata fcoder_metacmd_table[403] = {
 { PROC_LINKS(long_list_all_substring_locations_of_identifier_case_insensitive_current_buffer, 0), false, "long_list_all_substring_locations_of_identifier_case_insensitive_current_buffer", 79, "Reads a token or word under the cursor and lists all exact case-insensitive mathces in the current buffer.", 106, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 1776 },
 { PROC_LINKS(long_load_project, 0), false, "long_load_project", 17, "Looks for a project.4coder file in the current directory and tries to load it.  Looks in parent directories until a project file is found or there are no more parents.", 167, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4483 },
 { PROC_LINKS(long_lower_case, 0), false, "long_lower_case", 15, "Turn all the upper-case characaters to lower-case in the range between the cursor and the mark.", 95, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 3956 },
-{ PROC_LINKS(long_macro_repeat, 0), false, "long_macro_repeat", 17, "Repeat most recently recorded keyboard macro n times.", 53, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4957 },
-{ PROC_LINKS(long_macro_toggle_recording, 0), false, "long_macro_toggle_recording", 27, "Toggle macro recording", 22, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4948 },
+{ PROC_LINKS(long_macro_repeat, 0), false, "long_macro_repeat", 17, "Repeat most recently recorded keyboard macro n times.", 53, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 5015 },
+{ PROC_LINKS(long_macro_toggle_recording, 0), false, "long_macro_toggle_recording", 27, "Toggle macro recording", 22, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 5006 },
 { PROC_LINKS(long_mc_align, 0), false, "long_mc_align", 13, "Align every cursor to the largest column.", 41, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 1862 },
 { PROC_LINKS(long_mc_begin_multi_block, 0), false, "long_mc_begin_multi_block", 25, "[MC] begins multi-cursor using cursor-mark block-rect", 53, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 1824 },
 { PROC_LINKS(long_mc_down_trail, 0), false, "long_mc_down_trail", 18, "moves down, leaving a multi-cursor behind it", 44, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 1818 },
@@ -635,23 +639,23 @@ static Command_Metadata fcoder_metacmd_table[403] = {
 { PROC_LINKS(long_select_surrounding_scope, 0), false, "long_select_surrounding_scope", 29, "Select the surrounding scope.", 29, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4122 },
 { PROC_LINKS(long_select_upper_scope, 0), false, "long_select_upper_scope", 23, "Select the surrounding scope.", 29, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4087 },
 { PROC_LINKS(long_setup_new_project, 0), false, "long_setup_new_project", 22, "Queries the user for several configuration options and initializes a new 4coder project with build scripts for every OS.", 120, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4497 },
-{ PROC_LINKS(long_startup, 0), false, "long_startup", 12, "Long startup event", 18, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long.cpp", 53, 704 },
+{ PROC_LINKS(long_startup, 0), false, "long_startup", 12, "Long startup event", 18, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long.cpp", 53, 698 },
 { PROC_LINKS(long_switch_move_side_mode, 0), false, "long_switch_move_side_mode", 26, "Change which side move_left/right/next/prev moves to.", 53, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 3596 },
 { PROC_LINKS(long_switch_pos_context_draw_position, 0), false, "long_switch_pos_context_draw_position", 37, "Switches between drawing the position context at cursor position or at bottom of buffer.", 88, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 2717 },
 { PROC_LINKS(long_switch_pos_context_option, 0), false, "long_switch_pos_context_option", 30, "Switches the position context mode.", 35, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 2711 },
 { PROC_LINKS(long_switch_to_search_buffer, 0), false, "long_switch_to_search_buffer", 28, "Switch to the search buffer.", 28, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 1192 },
-{ PROC_LINKS(long_test_lister_render_1, 0), false, "long_test_lister_render_1", 25, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat tellus vitae feugiat tincidunt. Suspendisse sagittis velit porttitor justo commodo sagittis. Etiam erat metus, elementum eu aliquam et, dictum at eros. Vivamus nulla ex, gravida malesuada iaculis id, maximus at quam. Fusce sodales, velit id varius rhoncus, odio ipsum placerat eros, nec euismod dui nunc in mauris. Donec quis commodo enim. Etiam sed efficitur elit, in interdum lacus. Vivamus sollicitudin hendrerit lacinia. Suspendisse aliquet bibendum nunc, eget fermentum quam feugiat ac. Sed at fringilla neque, eu aliquam risus. Donec ut ante eu erat cursus semper eget et velit. Quisque ut aliquam nibh. Curabitur et justo hendrerit, finibus sapien quis, fringilla ante. Nullam vehicula, nisi in facilisis egestas, tellus nunc faucibus lacus, tempor aliquet nulla felis sit amet felis. Nam non vulputate elit.\n\nVestibulum volutpat est vel felis tincidunt, sed imperdiet neque feugiat. Integer placerat dignissim eros, in sollicitudin lacus venenatis varius. Maecenas in feugiat ex. Nunc elementum sem est, sodales facilisis ligula hendrerit interdum. Integer pulvinar orci eget ipsum porta dapibus. Pellentesque sapien eros, semper sit amet placerat a, viverra malesuada nulla. Donec cursus turpis ut metus auctor pellentesque. Etiam dolor dui, maximus vitae malesuada ac, tincidunt eu tortor. Nullam felis ante, varius elementum mattis nec, pretium in diam.\n\nUt ut malesuada justo. Donec consequat magna sed diam feugiat pellentesque. Duis quis tempus tortor. Donec vulputate ullamcorper massa, eget porta metus ultrices nec. Cras dignissim dictum blandit. Nullam pellentesque volutpat purus vitae bibendum. Aenean quis neque eget orci imperdiet lacinia id finibus lorem. Interdum et malesuada fames ac ante ipsum primis in faucibus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Praesent dictum lectus a ligula venenatis, nec ultricies turpis placerat. Proin euismod ut odio eu luctus. Vivamus eleifend eros sit amet felis dapibus, ac tempus est feugiat. Vivamus sit amet quam id lorem commodo volutpat. Maecenas ac nulla non turpis euismod vestibulum eget vitae tortor.\n\nMauris venenatis nunc ac enim fringilla, vitae varius neque imperdiet. Duis odio purus, commodo in dolor in, mollis malesuada tellus. Duis pharetra vulputate mauris ut cursus. Cras non eros feugiat, lacinia augue ut, tincidunt arcu. Donec pulvinar pulvinar lorem, vel sollicitudin arcu commodo ac. Sed facilisis lorem elit, sit amet dapibus urna varius elementum. Cras at viverra urna, eu vehicula ligula. Etiam ut convallis magna. Suspendisse feugiat quam sit amet accumsan aliquet. Pellentesque vestibulum sapien ut urna sollicitudin consequat. Duis non ullamcorper nibh.\n\nNullam hendrerit, sem et dictum faucibus, neque purus tristique ligula, eu sollicitudin arcu orci in magna. Vivamus auctor, enim varius ornare mattis, dolor magna condimentum enim, nec convallis sem velit nec augue. Pellentesque rutrum mauris ut nulla consectetur condimentum. Aliquam nec massa eu metus sollicitudin tincidunt. Donec lobortis ultricies sem id pretium. Donec quis felis vel ante fermentum pretium. Nulla at mi sit amet ex molestie imperdiet a eget lacus. Nullam rutrum aliquet tellus interdum bibendum.", 3269, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_lister.cpp", 60, 844 },
-{ PROC_LINKS(long_test_lister_render_2, 0), false, "long_test_lister_render_2", 25, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat tellus vitae feugiat tincidunt. Suspendisse sagittis velit porttitor justo commodo sagittis. Etiam erat metus, elementum eu aliquam et, dictum at eros. Vivamus nulla ex, gravida malesuada iaculis id, maximus at quam. Fusce sodales, velit id varius rhoncus, odio ipsum placerat eros, nec euismod dui nunc in mauris. Donec quis commodo enim. Etiam sed efficitur elit, in interdum lacus. Vivamus sollicitudin hendrerit lacinia. Suspendisse aliquet bibendum nunc, eget fermentum quam feugiat ac. Sed at fringilla neque, eu aliquam risus. Donec ut ante eu erat cursus semper eget et velit. Quisque ut aliquam nibh. Curabitur et justo hendrerit, finibus sapien quis, fringilla ante. Nullam vehicula, nisi in facilisis egestas, tellus nunc faucibus lacus, tempor aliquet nulla felis sit amet felis. Nam non vulputate elit.\n\nVestibulum volutpat est vel felis tincidunt, sed imperdiet neque feugiat. Integer placerat dignissim eros, in sollicitudin lacus venenatis varius. Maecenas in feugiat ex. Nunc elementum sem est, sodales facilisis ligula hendrerit interdum. Integer pulvinar orci eget ipsum porta dapibus. Pellentesque sapien eros, semper sit amet placerat a, viverra malesuada nulla. Donec cursus turpis ut metus auctor pellentesque. Etiam dolor dui, maximus vitae malesuada ac, tincidunt eu tortor. Nullam felis ante, varius elementum mattis nec, pretium in diam.\n\nUt ut malesuada justo. Donec consequat magna sed diam feugiat pellentesque. Duis quis tempus tortor. Donec vulputate ullamcorper massa, eget porta metus ultrices nec. Cras dignissim dictum blandit. Nullam pellentesque volutpat purus vitae bibendum. Aenean quis neque eget orci imperdiet lacinia id finibus lorem. Interdum et malesuada fames ac ante ipsum primis in faucibus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Praesent dictum lectus a ligula venenatis, nec ultricies turpis placerat. Proin euismod ut odio eu luctus. Vivamus eleifend eros sit amet felis dapibus, ac tempus est feugiat. Vivamus sit amet quam id lorem commodo volutpat. Maecenas ac nulla non turpis euismod vestibulum eget vitae tortor.\n\nMauris venenatis nunc ac enim fringilla, vitae varius neque imperdiet. Duis odio purus, commodo in dolor in, mollis malesuada tellus. Duis pharetra vulputate mauris ut cursus. Cras non eros feugiat, lacinia augue ut, tincidunt arcu. Donec pulvinar pulvinar lorem, vel sollicitudin arcu commodo ac. Sed facilisis lorem elit, sit amet dapibus urna varius elementum. Cras at viverra urna, eu vehicula ligula. Etiam ut convallis magna. Suspendisse feugiat quam sit amet accumsan aliquet. Pellentesque vestibulum sapien ut urna sollicitudin consequat. Duis non ullamcorper nibh.\n\nNullam hendrerit, sem et dictum faucibus, neque purus tristique ligula, eu sollicitudin arcu orci in magna. Vivamus auctor, enim varius ornare mattis, dolor magna condimentum enim, nec convallis sem velit nec augue. Pellentesque rutrum mauris ut nulla consectetur condimentum. Aliquam nec massa eu metus sollicitudin tincidunt. Donec lobortis ultricies sem id pretium. Donec quis felis vel ante fermentum pretium. Nulla at mi sit amet ex molestie imperdiet a eget lacus. Nullam rutrum aliquet tellus interdum bibendum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat tellus vitae feugiat tincidunt. Suspendisse sagittis velit porttitor justo commodo sagittis. Etiam erat metus, elementum eu aliquam et, dictum at eros. Vivamus nulla ex, gravida malesuada iaculis id, maximus at quam. Fusce sodales, velit id varius rhoncus, odio ipsum placerat eros, nec euismod dui nunc in mauris. Donec quis commodo enim. Etiam sed efficitur elit, in interdum lacus. Vivamus sollicitudin hendrerit lacinia. Suspendisse aliquet bibendum nunc, eget fermentum quam feugiat ac. Sed at fringilla neque, eu aliquam risus. Donec ut ante eu erat cursus semper eget et velit. Quisque ut aliquam nibh. Curabitur et justo hendrerit, finibus sapien quis, fringilla ante. Nullam vehicula, nisi in facilisis egestas, tellus nunc faucibus lacus, tempor aliquet nulla felis sit amet felis. Nam non vulputate elit.\n\nVestibulum volutpat est vel felis tincidunt, sed imperdiet neque feugiat. Integer placerat dignissim eros, in sollicitudin lacus venenatis varius. Maecenas in feugiat ex. Nunc elementum sem est, sodales facilisis ligula hendrerit interdum. Integer pulvinar orci eget ipsum porta dapibus. Pellentesque sapien eros, semper sit amet placerat a, viverra malesuada nulla. Donec cursus turpis ut metus auctor pellentesque. Etiam dolor dui, maximus vitae malesuada ac, tincidunt eu tortor. Nullam felis ante, varius elementum mattis nec, pretium in diam.\n\nUt ut malesuada justo. Donec consequat magna sed diam feugiat pellentesque. Duis quis tempus tortor. Donec vulputate ullamcorper massa, eget porta metus ultrices nec. Cras dignissim dictum blandit. Nullam pellentesque volutpat purus vitae bibendum. Aenean quis neque eget orci imperdiet lacinia id finibus lorem. Interdum et malesuada fames ac ante ipsum primis in faucibus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Praesent dictum lectus a ligula venenatis, nec ultricies turpis placerat. Proin euismod ut odio eu luctus. Vivamus eleifend eros sit amet felis dapibus, ac tempus est feugiat. Vivamus sit amet quam id lorem commodo volutpat. Maecenas ac nulla non turpis euismod vestibulum eget vitae tortor.\n\nMauris venenatis nunc ac enim fringilla, vitae varius neque imperdiet. Duis odio purus, commodo in dolor in, mollis malesuada tellus. Duis pharetra vulputate mauris ut cursus. Cras non eros feugiat, lacinia augue ut, tincidunt arcu. Donec pulvinar pulvinar lorem, vel sollicitudin arcu commodo ac. Sed facilisis lorem elit, sit amet dapibus urna varius elementum. Cras at viverra urna, eu vehicula ligula. Etiam ut convallis magna. Suspendisse feugiat quam sit amet accumsan aliquet. Pellentesque vestibulum sapien ut urna sollicitudin consequat. Duis non ullamcorper nibh.\n\nNullam hendrerit, sem et dictum faucibus, neque purus tristique ligula, eu sollicitudin arcu orci in magna. Vivamus auctor, enim varius ornare mattis, dolor magna condimentum enim, nec convallis sem velit nec augue. Pellentesque rutrum mauris ut nulla consectetur condimentum. Aliquam nec massa eu metus sollicitudin tincidunt. Donec lobortis ultricies sem id pretium. Donec quis felis vel ante fermentum pretium. Nulla at mi sit amet ex molestie imperdiet a eget lacus. Nullam rutrum aliquet tellus interdum bibendum.", 6539, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_lister.cpp", 60, 847 },
-{ PROC_LINKS(long_test_lister_render_3, 0), false, "long_test_lister_render_3", 25, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789ABCDEF", 275, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_lister.cpp", 60, 850 },
-{ PROC_LINKS(long_test_lister_render_4, 0), false, "long_test_lister_render_4", 25, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 156, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_lister.cpp", 60, 853 },
-{ PROC_LINKS(long_theme_lister, 0), true, "long_theme_lister", 17, "Opens an interactive list of all registered themes.", 51, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4935 },
-{ PROC_LINKS(long_toggle_comment_selection, 0), false, "long_toggle_comment_selection", 29, "Performs VS-style (un)commenting on the selected range.", 55, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 5445 },
+{ PROC_LINKS(long_test_lister_render_1, 0), false, "long_test_lister_render_1", 25, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat tellus vitae feugiat tincidunt. Suspendisse sagittis velit porttitor justo commodo sagittis. Etiam erat metus, elementum eu aliquam et, dictum at eros. Vivamus nulla ex, gravida malesuada iaculis id, maximus at quam. Fusce sodales, velit id varius rhoncus, odio ipsum placerat eros, nec euismod dui nunc in mauris. Donec quis commodo enim. Etiam sed efficitur elit, in interdum lacus. Vivamus sollicitudin hendrerit lacinia. Suspendisse aliquet bibendum nunc, eget fermentum quam feugiat ac. Sed at fringilla neque, eu aliquam risus. Donec ut ante eu erat cursus semper eget et velit. Quisque ut aliquam nibh. Curabitur et justo hendrerit, finibus sapien quis, fringilla ante. Nullam vehicula, nisi in facilisis egestas, tellus nunc faucibus lacus, tempor aliquet nulla felis sit amet felis. Nam non vulputate elit.\n\nVestibulum volutpat est vel felis tincidunt, sed imperdiet neque feugiat. Integer placerat dignissim eros, in sollicitudin lacus venenatis varius. Maecenas in feugiat ex. Nunc elementum sem est, sodales facilisis ligula hendrerit interdum. Integer pulvinar orci eget ipsum porta dapibus. Pellentesque sapien eros, semper sit amet placerat a, viverra malesuada nulla. Donec cursus turpis ut metus auctor pellentesque. Etiam dolor dui, maximus vitae malesuada ac, tincidunt eu tortor. Nullam felis ante, varius elementum mattis nec, pretium in diam.\n\nUt ut malesuada justo. Donec consequat magna sed diam feugiat pellentesque. Duis quis tempus tortor. Donec vulputate ullamcorper massa, eget porta metus ultrices nec. Cras dignissim dictum blandit. Nullam pellentesque volutpat purus vitae bibendum. Aenean quis neque eget orci imperdiet lacinia id finibus lorem. Interdum et malesuada fames ac ante ipsum primis in faucibus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Praesent dictum lectus a ligula venenatis, nec ultricies turpis placerat. Proin euismod ut odio eu luctus. Vivamus eleifend eros sit amet felis dapibus, ac tempus est feugiat. Vivamus sit amet quam id lorem commodo volutpat. Maecenas ac nulla non turpis euismod vestibulum eget vitae tortor.\n\nMauris venenatis nunc ac enim fringilla, vitae varius neque imperdiet. Duis odio purus, commodo in dolor in, mollis malesuada tellus. Duis pharetra vulputate mauris ut cursus. Cras non eros feugiat, lacinia augue ut, tincidunt arcu. Donec pulvinar pulvinar lorem, vel sollicitudin arcu commodo ac. Sed facilisis lorem elit, sit amet dapibus urna varius elementum. Cras at viverra urna, eu vehicula ligula. Etiam ut convallis magna. Suspendisse feugiat quam sit amet accumsan aliquet. Pellentesque vestibulum sapien ut urna sollicitudin consequat. Duis non ullamcorper nibh.\n\nNullam hendrerit, sem et dictum faucibus, neque purus tristique ligula, eu sollicitudin arcu orci in magna. Vivamus auctor, enim varius ornare mattis, dolor magna condimentum enim, nec convallis sem velit nec augue. Pellentesque rutrum mauris ut nulla consectetur condimentum. Aliquam nec massa eu metus sollicitudin tincidunt. Donec lobortis ultricies sem id pretium. Donec quis felis vel ante fermentum pretium. Nulla at mi sit amet ex molestie imperdiet a eget lacus. Nullam rutrum aliquet tellus interdum bibendum.", 3269, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_lister.cpp", 60, 883 },
+{ PROC_LINKS(long_test_lister_render_2, 0), false, "long_test_lister_render_2", 25, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat tellus vitae feugiat tincidunt. Suspendisse sagittis velit porttitor justo commodo sagittis. Etiam erat metus, elementum eu aliquam et, dictum at eros. Vivamus nulla ex, gravida malesuada iaculis id, maximus at quam. Fusce sodales, velit id varius rhoncus, odio ipsum placerat eros, nec euismod dui nunc in mauris. Donec quis commodo enim. Etiam sed efficitur elit, in interdum lacus. Vivamus sollicitudin hendrerit lacinia. Suspendisse aliquet bibendum nunc, eget fermentum quam feugiat ac. Sed at fringilla neque, eu aliquam risus. Donec ut ante eu erat cursus semper eget et velit. Quisque ut aliquam nibh. Curabitur et justo hendrerit, finibus sapien quis, fringilla ante. Nullam vehicula, nisi in facilisis egestas, tellus nunc faucibus lacus, tempor aliquet nulla felis sit amet felis. Nam non vulputate elit.\n\nVestibulum volutpat est vel felis tincidunt, sed imperdiet neque feugiat. Integer placerat dignissim eros, in sollicitudin lacus venenatis varius. Maecenas in feugiat ex. Nunc elementum sem est, sodales facilisis ligula hendrerit interdum. Integer pulvinar orci eget ipsum porta dapibus. Pellentesque sapien eros, semper sit amet placerat a, viverra malesuada nulla. Donec cursus turpis ut metus auctor pellentesque. Etiam dolor dui, maximus vitae malesuada ac, tincidunt eu tortor. Nullam felis ante, varius elementum mattis nec, pretium in diam.\n\nUt ut malesuada justo. Donec consequat magna sed diam feugiat pellentesque. Duis quis tempus tortor. Donec vulputate ullamcorper massa, eget porta metus ultrices nec. Cras dignissim dictum blandit. Nullam pellentesque volutpat purus vitae bibendum. Aenean quis neque eget orci imperdiet lacinia id finibus lorem. Interdum et malesuada fames ac ante ipsum primis in faucibus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Praesent dictum lectus a ligula venenatis, nec ultricies turpis placerat. Proin euismod ut odio eu luctus. Vivamus eleifend eros sit amet felis dapibus, ac tempus est feugiat. Vivamus sit amet quam id lorem commodo volutpat. Maecenas ac nulla non turpis euismod vestibulum eget vitae tortor.\n\nMauris venenatis nunc ac enim fringilla, vitae varius neque imperdiet. Duis odio purus, commodo in dolor in, mollis malesuada tellus. Duis pharetra vulputate mauris ut cursus. Cras non eros feugiat, lacinia augue ut, tincidunt arcu. Donec pulvinar pulvinar lorem, vel sollicitudin arcu commodo ac. Sed facilisis lorem elit, sit amet dapibus urna varius elementum. Cras at viverra urna, eu vehicula ligula. Etiam ut convallis magna. Suspendisse feugiat quam sit amet accumsan aliquet. Pellentesque vestibulum sapien ut urna sollicitudin consequat. Duis non ullamcorper nibh.\n\nNullam hendrerit, sem et dictum faucibus, neque purus tristique ligula, eu sollicitudin arcu orci in magna. Vivamus auctor, enim varius ornare mattis, dolor magna condimentum enim, nec convallis sem velit nec augue. Pellentesque rutrum mauris ut nulla consectetur condimentum. Aliquam nec massa eu metus sollicitudin tincidunt. Donec lobortis ultricies sem id pretium. Donec quis felis vel ante fermentum pretium. Nulla at mi sit amet ex molestie imperdiet a eget lacus. Nullam rutrum aliquet tellus interdum bibendum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat tellus vitae feugiat tincidunt. Suspendisse sagittis velit porttitor justo commodo sagittis. Etiam erat metus, elementum eu aliquam et, dictum at eros. Vivamus nulla ex, gravida malesuada iaculis id, maximus at quam. Fusce sodales, velit id varius rhoncus, odio ipsum placerat eros, nec euismod dui nunc in mauris. Donec quis commodo enim. Etiam sed efficitur elit, in interdum lacus. Vivamus sollicitudin hendrerit lacinia. Suspendisse aliquet bibendum nunc, eget fermentum quam feugiat ac. Sed at fringilla neque, eu aliquam risus. Donec ut ante eu erat cursus semper eget et velit. Quisque ut aliquam nibh. Curabitur et justo hendrerit, finibus sapien quis, fringilla ante. Nullam vehicula, nisi in facilisis egestas, tellus nunc faucibus lacus, tempor aliquet nulla felis sit amet felis. Nam non vulputate elit.\n\nVestibulum volutpat est vel felis tincidunt, sed imperdiet neque feugiat. Integer placerat dignissim eros, in sollicitudin lacus venenatis varius. Maecenas in feugiat ex. Nunc elementum sem est, sodales facilisis ligula hendrerit interdum. Integer pulvinar orci eget ipsum porta dapibus. Pellentesque sapien eros, semper sit amet placerat a, viverra malesuada nulla. Donec cursus turpis ut metus auctor pellentesque. Etiam dolor dui, maximus vitae malesuada ac, tincidunt eu tortor. Nullam felis ante, varius elementum mattis nec, pretium in diam.\n\nUt ut malesuada justo. Donec consequat magna sed diam feugiat pellentesque. Duis quis tempus tortor. Donec vulputate ullamcorper massa, eget porta metus ultrices nec. Cras dignissim dictum blandit. Nullam pellentesque volutpat purus vitae bibendum. Aenean quis neque eget orci imperdiet lacinia id finibus lorem. Interdum et malesuada fames ac ante ipsum primis in faucibus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Praesent dictum lectus a ligula venenatis, nec ultricies turpis placerat. Proin euismod ut odio eu luctus. Vivamus eleifend eros sit amet felis dapibus, ac tempus est feugiat. Vivamus sit amet quam id lorem commodo volutpat. Maecenas ac nulla non turpis euismod vestibulum eget vitae tortor.\n\nMauris venenatis nunc ac enim fringilla, vitae varius neque imperdiet. Duis odio purus, commodo in dolor in, mollis malesuada tellus. Duis pharetra vulputate mauris ut cursus. Cras non eros feugiat, lacinia augue ut, tincidunt arcu. Donec pulvinar pulvinar lorem, vel sollicitudin arcu commodo ac. Sed facilisis lorem elit, sit amet dapibus urna varius elementum. Cras at viverra urna, eu vehicula ligula. Etiam ut convallis magna. Suspendisse feugiat quam sit amet accumsan aliquet. Pellentesque vestibulum sapien ut urna sollicitudin consequat. Duis non ullamcorper nibh.\n\nNullam hendrerit, sem et dictum faucibus, neque purus tristique ligula, eu sollicitudin arcu orci in magna. Vivamus auctor, enim varius ornare mattis, dolor magna condimentum enim, nec convallis sem velit nec augue. Pellentesque rutrum mauris ut nulla consectetur condimentum. Aliquam nec massa eu metus sollicitudin tincidunt. Donec lobortis ultricies sem id pretium. Donec quis felis vel ante fermentum pretium. Nulla at mi sit amet ex molestie imperdiet a eget lacus. Nullam rutrum aliquet tellus interdum bibendum.", 6539, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_lister.cpp", 60, 886 },
+{ PROC_LINKS(long_test_lister_render_3, 0), false, "long_test_lister_render_3", 25, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789ABCDEF", 275, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_lister.cpp", 60, 889 },
+{ PROC_LINKS(long_test_lister_render_4, 0), false, "long_test_lister_render_4", 25, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 156, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_lister.cpp", 60, 892 },
+{ PROC_LINKS(long_theme_lister, 0), true, "long_theme_lister", 17, "Opens an interactive list of all registered themes.", 51, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 4993 },
+{ PROC_LINKS(long_toggle_comment_selection, 0), false, "long_toggle_comment_selection", 29, "Performs VS-style (un)commenting on the selected range.", 55, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 5503 },
 { PROC_LINKS(long_toggle_compilation_expand, 0), false, "long_toggle_compilation_expand", 30, "Expand the compilation window.", 30, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 1216 },
-{ PROC_LINKS(long_toggle_line_offset, 0), false, "long_toggle_line_offset", 23, "Toggles between line numbers and offsets.", 41, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_render.cpp", 60, 714 },
+{ PROC_LINKS(long_toggle_line_offset, 0), false, "long_toggle_line_offset", 23, "Toggles between line numbers and offsets.", 41, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_render.cpp", 60, 734 },
 { PROC_LINKS(long_toggle_panel_expand, 0), false, "long_toggle_panel_expand", 24, "Expand the current window.", 26, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 1263 },
 { PROC_LINKS(long_toggle_panel_expand_big, 0), false, "long_toggle_panel_expand_big", 28, "Expand the current window.", 26, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 1274 },
 { PROC_LINKS(long_toggle_pos_context, 0), false, "long_toggle_pos_context", 23, "Toggles position context window.", 32, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 2705 },
-{ PROC_LINKS(long_toggle_whitespace_all, 0), false, "long_toggle_whitespace_all", 26, "Toggles whitespace visibility status for all buffers.", 53, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_render.cpp", 60, 1603 },
+{ PROC_LINKS(long_toggle_whitespace_all, 0), false, "long_toggle_whitespace_all", 26, "Toggles whitespace visibility status for all buffers.", 53, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_render.cpp", 60, 1623 },
 { PROC_LINKS(long_try_exit, 0), false, "long_try_exit", 13, "Command for responding to a try-exit event", 42, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_hooks.cpp", 59, 5 },
 { PROC_LINKS(long_undo, 0), false, "long_undo", 9, "Advances backwards through the undo history of the current buffer.", 66, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 928 },
 { PROC_LINKS(long_undo_all_buffers, 0), false, "long_undo_all_buffers", 21, "Advances backward through the undo history in the buffer containing the most recent regular edit.", 97, "D:\\Programs\\4coder\\custom\\4coder_long\\4coder_long_base_commands.cpp", 67, 1008 },
@@ -948,288 +952,290 @@ static i32 fcoder_metacmd_ID_load_themes_hot_directory = 115;
 static i32 fcoder_metacmd_ID_long_autocomplete = 116;
 static i32 fcoder_metacmd_ID_long_backspace_alpha_numeric_or_camel = 117;
 static i32 fcoder_metacmd_ID_long_backspace_token = 118;
-static i32 fcoder_metacmd_ID_long_build_in_build_panel = 119;
-static i32 fcoder_metacmd_ID_long_change_active_panel = 120;
-static i32 fcoder_metacmd_ID_long_change_passive_panel = 121;
-static i32 fcoder_metacmd_ID_long_clean_whitespace_at_cursor = 122;
-static i32 fcoder_metacmd_ID_long_code_peek = 123;
-static i32 fcoder_metacmd_ID_long_command_lister = 124;
-static i32 fcoder_metacmd_ID_long_copy = 125;
-static i32 fcoder_metacmd_ID_long_copy_line = 126;
-static i32 fcoder_metacmd_ID_long_copy_token = 127;
-static i32 fcoder_metacmd_ID_long_cursor_mark_swap = 128;
-static i32 fcoder_metacmd_ID_long_cut_line = 129;
-static i32 fcoder_metacmd_ID_long_cut_token = 130;
-static i32 fcoder_metacmd_ID_long_delete_alpha_numeric_or_camel = 131;
-static i32 fcoder_metacmd_ID_long_delete_range = 132;
-static i32 fcoder_metacmd_ID_long_delete_token = 133;
-static i32 fcoder_metacmd_ID_long_execute_any_cli = 134;
-static i32 fcoder_metacmd_ID_long_explorer = 135;
-static i32 fcoder_metacmd_ID_long_go_to_definition = 136;
-static i32 fcoder_metacmd_ID_long_go_to_definition_same_panel = 137;
-static i32 fcoder_metacmd_ID_long_history_lister = 138;
-static i32 fcoder_metacmd_ID_long_if_read_only_goto_position = 139;
-static i32 fcoder_metacmd_ID_long_indent_range = 140;
-static i32 fcoder_metacmd_ID_long_indent_whole_file = 141;
-static i32 fcoder_metacmd_ID_long_interactive_kill_buffer = 142;
-static i32 fcoder_metacmd_ID_long_interactive_open_or_new = 143;
-static i32 fcoder_metacmd_ID_long_interactive_switch_buffer = 144;
-static i32 fcoder_metacmd_ID_long_inverse_case = 145;
-static i32 fcoder_metacmd_ID_long_jump_lister = 146;
-static i32 fcoder_metacmd_ID_long_kill_buffer = 147;
-static i32 fcoder_metacmd_ID_long_kill_search_buffer = 148;
-static i32 fcoder_metacmd_ID_long_list_all_locations = 149;
-static i32 fcoder_metacmd_ID_long_list_all_locations_current_buffer = 150;
-static i32 fcoder_metacmd_ID_long_list_all_locations_of_identifier = 151;
-static i32 fcoder_metacmd_ID_long_list_all_locations_of_identifier_current_buffer = 152;
-static i32 fcoder_metacmd_ID_long_list_all_substring_locations_case_insensitive = 153;
-static i32 fcoder_metacmd_ID_long_list_all_substring_locations_case_insensitive_current_buffer = 154;
-static i32 fcoder_metacmd_ID_long_list_all_substring_locations_of_identifier_case_insensitive = 155;
-static i32 fcoder_metacmd_ID_long_list_all_substring_locations_of_identifier_case_insensitive_current_buffer = 156;
-static i32 fcoder_metacmd_ID_long_load_project = 157;
-static i32 fcoder_metacmd_ID_long_lower_case = 158;
-static i32 fcoder_metacmd_ID_long_macro_repeat = 159;
-static i32 fcoder_metacmd_ID_long_macro_toggle_recording = 160;
-static i32 fcoder_metacmd_ID_long_mc_align = 161;
-static i32 fcoder_metacmd_ID_long_mc_begin_multi_block = 162;
-static i32 fcoder_metacmd_ID_long_mc_down_trail = 163;
-static i32 fcoder_metacmd_ID_long_mc_up_trail = 164;
-static i32 fcoder_metacmd_ID_long_move_down_token_occurrence = 165;
-static i32 fcoder_metacmd_ID_long_move_line_down = 166;
-static i32 fcoder_metacmd_ID_long_move_line_up = 167;
-static i32 fcoder_metacmd_ID_long_move_next_alpha_numeric_or_camel = 168;
-static i32 fcoder_metacmd_ID_long_move_next_word = 169;
-static i32 fcoder_metacmd_ID_long_move_prev_alpha_numeric_or_camel = 170;
-static i32 fcoder_metacmd_ID_long_move_prev_word = 171;
-static i32 fcoder_metacmd_ID_long_move_to_next_divider_comment = 172;
-static i32 fcoder_metacmd_ID_long_move_to_next_function_and_type = 173;
-static i32 fcoder_metacmd_ID_long_move_to_prev_divider_comment = 174;
-static i32 fcoder_metacmd_ID_long_move_to_prev_function_and_type = 175;
-static i32 fcoder_metacmd_ID_long_move_up_token_occurrence = 176;
-static i32 fcoder_metacmd_ID_long_open_matching_file_same_panel = 177;
-static i32 fcoder_metacmd_ID_long_paste_and_indent = 178;
-static i32 fcoder_metacmd_ID_long_paste_and_replace_range = 179;
-static i32 fcoder_metacmd_ID_long_point_lister = 180;
-static i32 fcoder_metacmd_ID_long_push_new_jump = 181;
-static i32 fcoder_metacmd_ID_long_query_replace = 182;
-static i32 fcoder_metacmd_ID_long_query_replace_identifier = 183;
-static i32 fcoder_metacmd_ID_long_query_replace_selection = 184;
-static i32 fcoder_metacmd_ID_long_redo = 185;
-static i32 fcoder_metacmd_ID_long_redo_all_buffers = 186;
-static i32 fcoder_metacmd_ID_long_redo_jump = 187;
-static i32 fcoder_metacmd_ID_long_redo_same_pos = 188;
-static i32 fcoder_metacmd_ID_long_reload_all_themes_default_folder = 189;
-static i32 fcoder_metacmd_ID_long_replace_all_buffers = 190;
-static i32 fcoder_metacmd_ID_long_replace_in_range = 191;
-static i32 fcoder_metacmd_ID_long_reverse_search = 192;
-static i32 fcoder_metacmd_ID_long_reverse_search_case_sensitive = 193;
-static i32 fcoder_metacmd_ID_long_reverse_search_identifier = 194;
-static i32 fcoder_metacmd_ID_long_search = 195;
-static i32 fcoder_metacmd_ID_long_search_case_sensitive = 196;
-static i32 fcoder_metacmd_ID_long_search_for_definition__current_file = 197;
-static i32 fcoder_metacmd_ID_long_search_for_definition__project_wide = 198;
-static i32 fcoder_metacmd_ID_long_search_for_definition_no_filter__project_file = 199;
-static i32 fcoder_metacmd_ID_long_search_identifier = 200;
-static i32 fcoder_metacmd_ID_long_search_identifier_case_sensitive = 201;
-static i32 fcoder_metacmd_ID_long_select_current_line = 202;
-static i32 fcoder_metacmd_ID_long_select_current_token = 203;
-static i32 fcoder_metacmd_ID_long_select_lower_scope = 204;
-static i32 fcoder_metacmd_ID_long_select_next_scope_current_level = 205;
-static i32 fcoder_metacmd_ID_long_select_prev_scope_current_level = 206;
-static i32 fcoder_metacmd_ID_long_select_surrounding_scope = 207;
-static i32 fcoder_metacmd_ID_long_select_upper_scope = 208;
-static i32 fcoder_metacmd_ID_long_setup_new_project = 209;
-static i32 fcoder_metacmd_ID_long_startup = 210;
-static i32 fcoder_metacmd_ID_long_switch_move_side_mode = 211;
-static i32 fcoder_metacmd_ID_long_switch_pos_context_draw_position = 212;
-static i32 fcoder_metacmd_ID_long_switch_pos_context_option = 213;
-static i32 fcoder_metacmd_ID_long_switch_to_search_buffer = 214;
-static i32 fcoder_metacmd_ID_long_test_lister_render_1 = 215;
-static i32 fcoder_metacmd_ID_long_test_lister_render_2 = 216;
-static i32 fcoder_metacmd_ID_long_test_lister_render_3 = 217;
-static i32 fcoder_metacmd_ID_long_test_lister_render_4 = 218;
-static i32 fcoder_metacmd_ID_long_theme_lister = 219;
-static i32 fcoder_metacmd_ID_long_toggle_comment_selection = 220;
-static i32 fcoder_metacmd_ID_long_toggle_compilation_expand = 221;
-static i32 fcoder_metacmd_ID_long_toggle_line_offset = 222;
-static i32 fcoder_metacmd_ID_long_toggle_panel_expand = 223;
-static i32 fcoder_metacmd_ID_long_toggle_panel_expand_big = 224;
-static i32 fcoder_metacmd_ID_long_toggle_pos_context = 225;
-static i32 fcoder_metacmd_ID_long_toggle_whitespace_all = 226;
-static i32 fcoder_metacmd_ID_long_try_exit = 227;
-static i32 fcoder_metacmd_ID_long_undo = 228;
-static i32 fcoder_metacmd_ID_long_undo_all_buffers = 229;
-static i32 fcoder_metacmd_ID_long_undo_jump = 230;
-static i32 fcoder_metacmd_ID_long_undo_same_pos = 231;
-static i32 fcoder_metacmd_ID_long_upper_case = 232;
-static i32 fcoder_metacmd_ID_long_view_input_handler = 233;
-static i32 fcoder_metacmd_ID_long_write_text_and_auto_indent = 234;
-static i32 fcoder_metacmd_ID_long_write_to_file_all_declarations = 235;
-static i32 fcoder_metacmd_ID_long_write_to_file_all_definitions = 236;
-static i32 fcoder_metacmd_ID_long_write_to_file_all_empty_scopes = 237;
-static i32 fcoder_metacmd_ID_long_write_to_file_all_identifiers = 238;
-static i32 fcoder_metacmd_ID_make_directory_query = 239;
-static i32 fcoder_metacmd_ID_miblo_decrement_basic = 240;
-static i32 fcoder_metacmd_ID_miblo_decrement_time_stamp = 241;
-static i32 fcoder_metacmd_ID_miblo_decrement_time_stamp_minute = 242;
-static i32 fcoder_metacmd_ID_miblo_increment_basic = 243;
-static i32 fcoder_metacmd_ID_miblo_increment_time_stamp = 244;
-static i32 fcoder_metacmd_ID_miblo_increment_time_stamp_minute = 245;
-static i32 fcoder_metacmd_ID_mouse_wheel_change_face_size = 246;
-static i32 fcoder_metacmd_ID_mouse_wheel_scroll = 247;
-static i32 fcoder_metacmd_ID_move_down = 248;
-static i32 fcoder_metacmd_ID_move_down_10 = 249;
-static i32 fcoder_metacmd_ID_move_down_textual = 250;
-static i32 fcoder_metacmd_ID_move_down_to_blank_line = 251;
-static i32 fcoder_metacmd_ID_move_down_to_blank_line_end = 252;
-static i32 fcoder_metacmd_ID_move_down_to_blank_line_skip_whitespace = 253;
-static i32 fcoder_metacmd_ID_move_left = 254;
-static i32 fcoder_metacmd_ID_move_left_alpha_numeric_boundary = 255;
-static i32 fcoder_metacmd_ID_move_left_alpha_numeric_or_camel_boundary = 256;
-static i32 fcoder_metacmd_ID_move_left_token_boundary = 257;
-static i32 fcoder_metacmd_ID_move_left_whitespace_boundary = 258;
-static i32 fcoder_metacmd_ID_move_left_whitespace_or_token_boundary = 259;
-static i32 fcoder_metacmd_ID_move_line_down = 260;
-static i32 fcoder_metacmd_ID_move_line_up = 261;
-static i32 fcoder_metacmd_ID_move_right = 262;
-static i32 fcoder_metacmd_ID_move_right_alpha_numeric_boundary = 263;
-static i32 fcoder_metacmd_ID_move_right_alpha_numeric_or_camel_boundary = 264;
-static i32 fcoder_metacmd_ID_move_right_token_boundary = 265;
-static i32 fcoder_metacmd_ID_move_right_whitespace_boundary = 266;
-static i32 fcoder_metacmd_ID_move_right_whitespace_or_token_boundary = 267;
-static i32 fcoder_metacmd_ID_move_up = 268;
-static i32 fcoder_metacmd_ID_move_up_10 = 269;
-static i32 fcoder_metacmd_ID_move_up_to_blank_line = 270;
-static i32 fcoder_metacmd_ID_move_up_to_blank_line_end = 271;
-static i32 fcoder_metacmd_ID_move_up_to_blank_line_skip_whitespace = 272;
-static i32 fcoder_metacmd_ID_multi_paste = 273;
-static i32 fcoder_metacmd_ID_multi_paste_interactive = 274;
-static i32 fcoder_metacmd_ID_multi_paste_interactive_quick = 275;
-static i32 fcoder_metacmd_ID_music_start = 276;
-static i32 fcoder_metacmd_ID_music_stop = 277;
-static i32 fcoder_metacmd_ID_open_all_code = 278;
-static i32 fcoder_metacmd_ID_open_all_code_recursive = 279;
-static i32 fcoder_metacmd_ID_open_file_in_quotes = 280;
-static i32 fcoder_metacmd_ID_open_in_other = 281;
-static i32 fcoder_metacmd_ID_open_long_braces = 282;
-static i32 fcoder_metacmd_ID_open_long_braces_break = 283;
-static i32 fcoder_metacmd_ID_open_long_braces_semicolon = 284;
-static i32 fcoder_metacmd_ID_open_matching_file_cpp = 285;
-static i32 fcoder_metacmd_ID_open_panel_hsplit = 286;
-static i32 fcoder_metacmd_ID_open_panel_vsplit = 287;
-static i32 fcoder_metacmd_ID_page_down = 288;
-static i32 fcoder_metacmd_ID_page_up = 289;
-static i32 fcoder_metacmd_ID_paste = 290;
-static i32 fcoder_metacmd_ID_paste_and_indent = 291;
-static i32 fcoder_metacmd_ID_paste_next = 292;
-static i32 fcoder_metacmd_ID_paste_next_and_indent = 293;
-static i32 fcoder_metacmd_ID_place_in_scope = 294;
-static i32 fcoder_metacmd_ID_play_with_a_counter = 295;
-static i32 fcoder_metacmd_ID_profile_clear = 296;
-static i32 fcoder_metacmd_ID_profile_disable = 297;
-static i32 fcoder_metacmd_ID_profile_enable = 298;
-static i32 fcoder_metacmd_ID_profile_inspect = 299;
-static i32 fcoder_metacmd_ID_project_command_F1 = 300;
-static i32 fcoder_metacmd_ID_project_command_F10 = 301;
-static i32 fcoder_metacmd_ID_project_command_F11 = 302;
-static i32 fcoder_metacmd_ID_project_command_F12 = 303;
-static i32 fcoder_metacmd_ID_project_command_F13 = 304;
-static i32 fcoder_metacmd_ID_project_command_F14 = 305;
-static i32 fcoder_metacmd_ID_project_command_F15 = 306;
-static i32 fcoder_metacmd_ID_project_command_F16 = 307;
-static i32 fcoder_metacmd_ID_project_command_F2 = 308;
-static i32 fcoder_metacmd_ID_project_command_F3 = 309;
-static i32 fcoder_metacmd_ID_project_command_F4 = 310;
-static i32 fcoder_metacmd_ID_project_command_F5 = 311;
-static i32 fcoder_metacmd_ID_project_command_F6 = 312;
-static i32 fcoder_metacmd_ID_project_command_F7 = 313;
-static i32 fcoder_metacmd_ID_project_command_F8 = 314;
-static i32 fcoder_metacmd_ID_project_command_F9 = 315;
-static i32 fcoder_metacmd_ID_project_command_lister = 316;
-static i32 fcoder_metacmd_ID_project_fkey_command = 317;
-static i32 fcoder_metacmd_ID_project_go_to_root_directory = 318;
-static i32 fcoder_metacmd_ID_project_reprint = 319;
-static i32 fcoder_metacmd_ID_query_replace = 320;
-static i32 fcoder_metacmd_ID_query_replace_identifier = 321;
-static i32 fcoder_metacmd_ID_query_replace_selection = 322;
-static i32 fcoder_metacmd_ID_quick_swap_buffer = 323;
-static i32 fcoder_metacmd_ID_redo = 324;
-static i32 fcoder_metacmd_ID_redo_all_buffers = 325;
-static i32 fcoder_metacmd_ID_rename_file_query = 326;
-static i32 fcoder_metacmd_ID_reopen = 327;
-static i32 fcoder_metacmd_ID_replace_in_all_buffers = 328;
-static i32 fcoder_metacmd_ID_replace_in_buffer = 329;
-static i32 fcoder_metacmd_ID_replace_in_range = 330;
-static i32 fcoder_metacmd_ID_reverse_search = 331;
-static i32 fcoder_metacmd_ID_reverse_search_identifier = 332;
-static i32 fcoder_metacmd_ID_save = 333;
-static i32 fcoder_metacmd_ID_save_all_dirty_buffers = 334;
-static i32 fcoder_metacmd_ID_save_to_query = 335;
-static i32 fcoder_metacmd_ID_search = 336;
-static i32 fcoder_metacmd_ID_search_identifier = 337;
-static i32 fcoder_metacmd_ID_seek_beginning_of_line = 338;
-static i32 fcoder_metacmd_ID_seek_beginning_of_textual_line = 339;
-static i32 fcoder_metacmd_ID_seek_end_of_line = 340;
-static i32 fcoder_metacmd_ID_seek_end_of_textual_line = 341;
-static i32 fcoder_metacmd_ID_select_all = 342;
-static i32 fcoder_metacmd_ID_select_next_scope_absolute = 343;
-static i32 fcoder_metacmd_ID_select_next_scope_after_current = 344;
-static i32 fcoder_metacmd_ID_select_prev_scope_absolute = 345;
-static i32 fcoder_metacmd_ID_select_prev_top_most_scope = 346;
-static i32 fcoder_metacmd_ID_select_surrounding_scope = 347;
-static i32 fcoder_metacmd_ID_select_surrounding_scope_maximal = 348;
-static i32 fcoder_metacmd_ID_set_eol_mode_from_contents = 349;
-static i32 fcoder_metacmd_ID_set_eol_mode_to_binary = 350;
-static i32 fcoder_metacmd_ID_set_eol_mode_to_crlf = 351;
-static i32 fcoder_metacmd_ID_set_eol_mode_to_lf = 352;
-static i32 fcoder_metacmd_ID_set_face_size = 353;
-static i32 fcoder_metacmd_ID_set_face_size_this_buffer = 354;
-static i32 fcoder_metacmd_ID_set_mark = 355;
-static i32 fcoder_metacmd_ID_set_mode_to_notepad_like = 356;
-static i32 fcoder_metacmd_ID_set_mode_to_original = 357;
-static i32 fcoder_metacmd_ID_setup_build_bat = 358;
-static i32 fcoder_metacmd_ID_setup_build_bat_and_sh = 359;
-static i32 fcoder_metacmd_ID_setup_build_sh = 360;
-static i32 fcoder_metacmd_ID_setup_new_project = 361;
-static i32 fcoder_metacmd_ID_show_filebar = 362;
-static i32 fcoder_metacmd_ID_show_scrollbar = 363;
-static i32 fcoder_metacmd_ID_show_the_log_graph = 364;
-static i32 fcoder_metacmd_ID_snipe_backward_whitespace_or_token_boundary = 365;
-static i32 fcoder_metacmd_ID_snipe_forward_whitespace_or_token_boundary = 366;
-static i32 fcoder_metacmd_ID_snippet_lister = 367;
-static i32 fcoder_metacmd_ID_string_repeat = 368;
-static i32 fcoder_metacmd_ID_suppress_mouse = 369;
-static i32 fcoder_metacmd_ID_swap_panels = 370;
-static i32 fcoder_metacmd_ID_theme_lister = 371;
-static i32 fcoder_metacmd_ID_to_lowercase = 372;
-static i32 fcoder_metacmd_ID_to_uppercase = 373;
-static i32 fcoder_metacmd_ID_toggle_filebar = 374;
-static i32 fcoder_metacmd_ID_toggle_fps_meter = 375;
-static i32 fcoder_metacmd_ID_toggle_fullscreen = 376;
-static i32 fcoder_metacmd_ID_toggle_highlight_enclosing_scopes = 377;
-static i32 fcoder_metacmd_ID_toggle_highlight_line_at_cursor = 378;
-static i32 fcoder_metacmd_ID_toggle_line_numbers = 379;
-static i32 fcoder_metacmd_ID_toggle_line_wrap = 380;
-static i32 fcoder_metacmd_ID_toggle_mouse = 381;
-static i32 fcoder_metacmd_ID_toggle_paren_matching_helper = 382;
-static i32 fcoder_metacmd_ID_toggle_show_whitespace = 383;
-static i32 fcoder_metacmd_ID_toggle_virtual_whitespace = 384;
-static i32 fcoder_metacmd_ID_tutorial_maximize = 385;
-static i32 fcoder_metacmd_ID_tutorial_minimize = 386;
-static i32 fcoder_metacmd_ID_uncomment_line = 387;
-static i32 fcoder_metacmd_ID_undo = 388;
-static i32 fcoder_metacmd_ID_undo_all_buffers = 389;
-static i32 fcoder_metacmd_ID_view_buffer_other_panel = 390;
-static i32 fcoder_metacmd_ID_view_jump_list_with_lister = 391;
-static i32 fcoder_metacmd_ID_word_complete = 392;
-static i32 fcoder_metacmd_ID_word_complete_drop_down = 393;
-static i32 fcoder_metacmd_ID_write_block = 394;
-static i32 fcoder_metacmd_ID_write_hack = 395;
-static i32 fcoder_metacmd_ID_write_note = 396;
-static i32 fcoder_metacmd_ID_write_space = 397;
-static i32 fcoder_metacmd_ID_write_text_and_auto_indent = 398;
-static i32 fcoder_metacmd_ID_write_text_input = 399;
-static i32 fcoder_metacmd_ID_write_todo = 400;
-static i32 fcoder_metacmd_ID_write_underscore = 401;
-static i32 fcoder_metacmd_ID_write_zero_struct = 402;
+static i32 fcoder_metacmd_ID_long_buffer_settings_lister = 119;
+static i32 fcoder_metacmd_ID_long_build_in_build_panel = 120;
+static i32 fcoder_metacmd_ID_long_change_active_panel = 121;
+static i32 fcoder_metacmd_ID_long_change_passive_panel = 122;
+static i32 fcoder_metacmd_ID_long_clean_whitespace_at_cursor = 123;
+static i32 fcoder_metacmd_ID_long_code_peek = 124;
+static i32 fcoder_metacmd_ID_long_command_lister = 125;
+static i32 fcoder_metacmd_ID_long_copy = 126;
+static i32 fcoder_metacmd_ID_long_copy_line = 127;
+static i32 fcoder_metacmd_ID_long_copy_token = 128;
+static i32 fcoder_metacmd_ID_long_cursor_mark_swap = 129;
+static i32 fcoder_metacmd_ID_long_cut_line = 130;
+static i32 fcoder_metacmd_ID_long_cut_token = 131;
+static i32 fcoder_metacmd_ID_long_delete_alpha_numeric_or_camel = 132;
+static i32 fcoder_metacmd_ID_long_delete_range = 133;
+static i32 fcoder_metacmd_ID_long_delete_token = 134;
+static i32 fcoder_metacmd_ID_long_execute_any_cli = 135;
+static i32 fcoder_metacmd_ID_long_explorer = 136;
+static i32 fcoder_metacmd_ID_long_global_settings_lister = 137;
+static i32 fcoder_metacmd_ID_long_go_to_definition = 138;
+static i32 fcoder_metacmd_ID_long_go_to_definition_same_panel = 139;
+static i32 fcoder_metacmd_ID_long_history_lister = 140;
+static i32 fcoder_metacmd_ID_long_if_read_only_goto_position = 141;
+static i32 fcoder_metacmd_ID_long_indent_range = 142;
+static i32 fcoder_metacmd_ID_long_indent_whole_file = 143;
+static i32 fcoder_metacmd_ID_long_interactive_kill_buffer = 144;
+static i32 fcoder_metacmd_ID_long_interactive_open_or_new = 145;
+static i32 fcoder_metacmd_ID_long_interactive_switch_buffer = 146;
+static i32 fcoder_metacmd_ID_long_inverse_case = 147;
+static i32 fcoder_metacmd_ID_long_jump_lister = 148;
+static i32 fcoder_metacmd_ID_long_kill_buffer = 149;
+static i32 fcoder_metacmd_ID_long_kill_search_buffer = 150;
+static i32 fcoder_metacmd_ID_long_list_all_locations = 151;
+static i32 fcoder_metacmd_ID_long_list_all_locations_current_buffer = 152;
+static i32 fcoder_metacmd_ID_long_list_all_locations_of_identifier = 153;
+static i32 fcoder_metacmd_ID_long_list_all_locations_of_identifier_current_buffer = 154;
+static i32 fcoder_metacmd_ID_long_list_all_substring_locations_case_insensitive = 155;
+static i32 fcoder_metacmd_ID_long_list_all_substring_locations_case_insensitive_current_buffer = 156;
+static i32 fcoder_metacmd_ID_long_list_all_substring_locations_of_identifier_case_insensitive = 157;
+static i32 fcoder_metacmd_ID_long_list_all_substring_locations_of_identifier_case_insensitive_current_buffer = 158;
+static i32 fcoder_metacmd_ID_long_load_project = 159;
+static i32 fcoder_metacmd_ID_long_lower_case = 160;
+static i32 fcoder_metacmd_ID_long_macro_repeat = 161;
+static i32 fcoder_metacmd_ID_long_macro_toggle_recording = 162;
+static i32 fcoder_metacmd_ID_long_mc_align = 163;
+static i32 fcoder_metacmd_ID_long_mc_begin_multi_block = 164;
+static i32 fcoder_metacmd_ID_long_mc_down_trail = 165;
+static i32 fcoder_metacmd_ID_long_mc_up_trail = 166;
+static i32 fcoder_metacmd_ID_long_move_down_token_occurrence = 167;
+static i32 fcoder_metacmd_ID_long_move_line_down = 168;
+static i32 fcoder_metacmd_ID_long_move_line_up = 169;
+static i32 fcoder_metacmd_ID_long_move_next_alpha_numeric_or_camel = 170;
+static i32 fcoder_metacmd_ID_long_move_next_word = 171;
+static i32 fcoder_metacmd_ID_long_move_prev_alpha_numeric_or_camel = 172;
+static i32 fcoder_metacmd_ID_long_move_prev_word = 173;
+static i32 fcoder_metacmd_ID_long_move_to_next_divider_comment = 174;
+static i32 fcoder_metacmd_ID_long_move_to_next_function_and_type = 175;
+static i32 fcoder_metacmd_ID_long_move_to_prev_divider_comment = 176;
+static i32 fcoder_metacmd_ID_long_move_to_prev_function_and_type = 177;
+static i32 fcoder_metacmd_ID_long_move_up_token_occurrence = 178;
+static i32 fcoder_metacmd_ID_long_open_matching_file_same_panel = 179;
+static i32 fcoder_metacmd_ID_long_paste_and_indent = 180;
+static i32 fcoder_metacmd_ID_long_paste_and_replace_range = 181;
+static i32 fcoder_metacmd_ID_long_point_lister = 182;
+static i32 fcoder_metacmd_ID_long_push_new_jump = 183;
+static i32 fcoder_metacmd_ID_long_query_replace = 184;
+static i32 fcoder_metacmd_ID_long_query_replace_identifier = 185;
+static i32 fcoder_metacmd_ID_long_query_replace_selection = 186;
+static i32 fcoder_metacmd_ID_long_redo = 187;
+static i32 fcoder_metacmd_ID_long_redo_all_buffers = 188;
+static i32 fcoder_metacmd_ID_long_redo_jump = 189;
+static i32 fcoder_metacmd_ID_long_redo_same_pos = 190;
+static i32 fcoder_metacmd_ID_long_reload_all_themes_default_folder = 191;
+static i32 fcoder_metacmd_ID_long_replace_all_buffers = 192;
+static i32 fcoder_metacmd_ID_long_replace_in_range = 193;
+static i32 fcoder_metacmd_ID_long_reverse_search = 194;
+static i32 fcoder_metacmd_ID_long_reverse_search_case_sensitive = 195;
+static i32 fcoder_metacmd_ID_long_reverse_search_identifier = 196;
+static i32 fcoder_metacmd_ID_long_search = 197;
+static i32 fcoder_metacmd_ID_long_search_case_sensitive = 198;
+static i32 fcoder_metacmd_ID_long_search_for_definition__current_file = 199;
+static i32 fcoder_metacmd_ID_long_search_for_definition__project_wide = 200;
+static i32 fcoder_metacmd_ID_long_search_for_definition_no_filter__project_file = 201;
+static i32 fcoder_metacmd_ID_long_search_identifier = 202;
+static i32 fcoder_metacmd_ID_long_search_identifier_case_sensitive = 203;
+static i32 fcoder_metacmd_ID_long_select_current_line = 204;
+static i32 fcoder_metacmd_ID_long_select_current_token = 205;
+static i32 fcoder_metacmd_ID_long_select_lower_scope = 206;
+static i32 fcoder_metacmd_ID_long_select_next_scope_current_level = 207;
+static i32 fcoder_metacmd_ID_long_select_prev_scope_current_level = 208;
+static i32 fcoder_metacmd_ID_long_select_surrounding_scope = 209;
+static i32 fcoder_metacmd_ID_long_select_upper_scope = 210;
+static i32 fcoder_metacmd_ID_long_setup_new_project = 211;
+static i32 fcoder_metacmd_ID_long_startup = 212;
+static i32 fcoder_metacmd_ID_long_switch_move_side_mode = 213;
+static i32 fcoder_metacmd_ID_long_switch_pos_context_draw_position = 214;
+static i32 fcoder_metacmd_ID_long_switch_pos_context_option = 215;
+static i32 fcoder_metacmd_ID_long_switch_to_search_buffer = 216;
+static i32 fcoder_metacmd_ID_long_test_lister_render_1 = 217;
+static i32 fcoder_metacmd_ID_long_test_lister_render_2 = 218;
+static i32 fcoder_metacmd_ID_long_test_lister_render_3 = 219;
+static i32 fcoder_metacmd_ID_long_test_lister_render_4 = 220;
+static i32 fcoder_metacmd_ID_long_theme_lister = 221;
+static i32 fcoder_metacmd_ID_long_toggle_comment_selection = 222;
+static i32 fcoder_metacmd_ID_long_toggle_compilation_expand = 223;
+static i32 fcoder_metacmd_ID_long_toggle_line_offset = 224;
+static i32 fcoder_metacmd_ID_long_toggle_panel_expand = 225;
+static i32 fcoder_metacmd_ID_long_toggle_panel_expand_big = 226;
+static i32 fcoder_metacmd_ID_long_toggle_pos_context = 227;
+static i32 fcoder_metacmd_ID_long_toggle_whitespace_all = 228;
+static i32 fcoder_metacmd_ID_long_try_exit = 229;
+static i32 fcoder_metacmd_ID_long_undo = 230;
+static i32 fcoder_metacmd_ID_long_undo_all_buffers = 231;
+static i32 fcoder_metacmd_ID_long_undo_jump = 232;
+static i32 fcoder_metacmd_ID_long_undo_same_pos = 233;
+static i32 fcoder_metacmd_ID_long_upper_case = 234;
+static i32 fcoder_metacmd_ID_long_view_input_handler = 235;
+static i32 fcoder_metacmd_ID_long_write_text_and_auto_indent = 236;
+static i32 fcoder_metacmd_ID_long_write_to_file_all_declarations = 237;
+static i32 fcoder_metacmd_ID_long_write_to_file_all_definitions = 238;
+static i32 fcoder_metacmd_ID_long_write_to_file_all_empty_scopes = 239;
+static i32 fcoder_metacmd_ID_long_write_to_file_all_identifiers = 240;
+static i32 fcoder_metacmd_ID_make_directory_query = 241;
+static i32 fcoder_metacmd_ID_miblo_decrement_basic = 242;
+static i32 fcoder_metacmd_ID_miblo_decrement_time_stamp = 243;
+static i32 fcoder_metacmd_ID_miblo_decrement_time_stamp_minute = 244;
+static i32 fcoder_metacmd_ID_miblo_increment_basic = 245;
+static i32 fcoder_metacmd_ID_miblo_increment_time_stamp = 246;
+static i32 fcoder_metacmd_ID_miblo_increment_time_stamp_minute = 247;
+static i32 fcoder_metacmd_ID_mouse_wheel_change_face_size = 248;
+static i32 fcoder_metacmd_ID_mouse_wheel_scroll = 249;
+static i32 fcoder_metacmd_ID_move_down = 250;
+static i32 fcoder_metacmd_ID_move_down_10 = 251;
+static i32 fcoder_metacmd_ID_move_down_textual = 252;
+static i32 fcoder_metacmd_ID_move_down_to_blank_line = 253;
+static i32 fcoder_metacmd_ID_move_down_to_blank_line_end = 254;
+static i32 fcoder_metacmd_ID_move_down_to_blank_line_skip_whitespace = 255;
+static i32 fcoder_metacmd_ID_move_left = 256;
+static i32 fcoder_metacmd_ID_move_left_alpha_numeric_boundary = 257;
+static i32 fcoder_metacmd_ID_move_left_alpha_numeric_or_camel_boundary = 258;
+static i32 fcoder_metacmd_ID_move_left_token_boundary = 259;
+static i32 fcoder_metacmd_ID_move_left_whitespace_boundary = 260;
+static i32 fcoder_metacmd_ID_move_left_whitespace_or_token_boundary = 261;
+static i32 fcoder_metacmd_ID_move_line_down = 262;
+static i32 fcoder_metacmd_ID_move_line_up = 263;
+static i32 fcoder_metacmd_ID_move_right = 264;
+static i32 fcoder_metacmd_ID_move_right_alpha_numeric_boundary = 265;
+static i32 fcoder_metacmd_ID_move_right_alpha_numeric_or_camel_boundary = 266;
+static i32 fcoder_metacmd_ID_move_right_token_boundary = 267;
+static i32 fcoder_metacmd_ID_move_right_whitespace_boundary = 268;
+static i32 fcoder_metacmd_ID_move_right_whitespace_or_token_boundary = 269;
+static i32 fcoder_metacmd_ID_move_up = 270;
+static i32 fcoder_metacmd_ID_move_up_10 = 271;
+static i32 fcoder_metacmd_ID_move_up_to_blank_line = 272;
+static i32 fcoder_metacmd_ID_move_up_to_blank_line_end = 273;
+static i32 fcoder_metacmd_ID_move_up_to_blank_line_skip_whitespace = 274;
+static i32 fcoder_metacmd_ID_multi_paste = 275;
+static i32 fcoder_metacmd_ID_multi_paste_interactive = 276;
+static i32 fcoder_metacmd_ID_multi_paste_interactive_quick = 277;
+static i32 fcoder_metacmd_ID_music_start = 278;
+static i32 fcoder_metacmd_ID_music_stop = 279;
+static i32 fcoder_metacmd_ID_open_all_code = 280;
+static i32 fcoder_metacmd_ID_open_all_code_recursive = 281;
+static i32 fcoder_metacmd_ID_open_file_in_quotes = 282;
+static i32 fcoder_metacmd_ID_open_in_other = 283;
+static i32 fcoder_metacmd_ID_open_long_braces = 284;
+static i32 fcoder_metacmd_ID_open_long_braces_break = 285;
+static i32 fcoder_metacmd_ID_open_long_braces_semicolon = 286;
+static i32 fcoder_metacmd_ID_open_matching_file_cpp = 287;
+static i32 fcoder_metacmd_ID_open_panel_hsplit = 288;
+static i32 fcoder_metacmd_ID_open_panel_vsplit = 289;
+static i32 fcoder_metacmd_ID_page_down = 290;
+static i32 fcoder_metacmd_ID_page_up = 291;
+static i32 fcoder_metacmd_ID_paste = 292;
+static i32 fcoder_metacmd_ID_paste_and_indent = 293;
+static i32 fcoder_metacmd_ID_paste_next = 294;
+static i32 fcoder_metacmd_ID_paste_next_and_indent = 295;
+static i32 fcoder_metacmd_ID_place_in_scope = 296;
+static i32 fcoder_metacmd_ID_play_with_a_counter = 297;
+static i32 fcoder_metacmd_ID_profile_clear = 298;
+static i32 fcoder_metacmd_ID_profile_disable = 299;
+static i32 fcoder_metacmd_ID_profile_enable = 300;
+static i32 fcoder_metacmd_ID_profile_inspect = 301;
+static i32 fcoder_metacmd_ID_project_command_F1 = 302;
+static i32 fcoder_metacmd_ID_project_command_F10 = 303;
+static i32 fcoder_metacmd_ID_project_command_F11 = 304;
+static i32 fcoder_metacmd_ID_project_command_F12 = 305;
+static i32 fcoder_metacmd_ID_project_command_F13 = 306;
+static i32 fcoder_metacmd_ID_project_command_F14 = 307;
+static i32 fcoder_metacmd_ID_project_command_F15 = 308;
+static i32 fcoder_metacmd_ID_project_command_F16 = 309;
+static i32 fcoder_metacmd_ID_project_command_F2 = 310;
+static i32 fcoder_metacmd_ID_project_command_F3 = 311;
+static i32 fcoder_metacmd_ID_project_command_F4 = 312;
+static i32 fcoder_metacmd_ID_project_command_F5 = 313;
+static i32 fcoder_metacmd_ID_project_command_F6 = 314;
+static i32 fcoder_metacmd_ID_project_command_F7 = 315;
+static i32 fcoder_metacmd_ID_project_command_F8 = 316;
+static i32 fcoder_metacmd_ID_project_command_F9 = 317;
+static i32 fcoder_metacmd_ID_project_command_lister = 318;
+static i32 fcoder_metacmd_ID_project_fkey_command = 319;
+static i32 fcoder_metacmd_ID_project_go_to_root_directory = 320;
+static i32 fcoder_metacmd_ID_project_reprint = 321;
+static i32 fcoder_metacmd_ID_query_replace = 322;
+static i32 fcoder_metacmd_ID_query_replace_identifier = 323;
+static i32 fcoder_metacmd_ID_query_replace_selection = 324;
+static i32 fcoder_metacmd_ID_quick_swap_buffer = 325;
+static i32 fcoder_metacmd_ID_redo = 326;
+static i32 fcoder_metacmd_ID_redo_all_buffers = 327;
+static i32 fcoder_metacmd_ID_rename_file_query = 328;
+static i32 fcoder_metacmd_ID_reopen = 329;
+static i32 fcoder_metacmd_ID_replace_in_all_buffers = 330;
+static i32 fcoder_metacmd_ID_replace_in_buffer = 331;
+static i32 fcoder_metacmd_ID_replace_in_range = 332;
+static i32 fcoder_metacmd_ID_reverse_search = 333;
+static i32 fcoder_metacmd_ID_reverse_search_identifier = 334;
+static i32 fcoder_metacmd_ID_save = 335;
+static i32 fcoder_metacmd_ID_save_all_dirty_buffers = 336;
+static i32 fcoder_metacmd_ID_save_to_query = 337;
+static i32 fcoder_metacmd_ID_search = 338;
+static i32 fcoder_metacmd_ID_search_identifier = 339;
+static i32 fcoder_metacmd_ID_seek_beginning_of_line = 340;
+static i32 fcoder_metacmd_ID_seek_beginning_of_textual_line = 341;
+static i32 fcoder_metacmd_ID_seek_end_of_line = 342;
+static i32 fcoder_metacmd_ID_seek_end_of_textual_line = 343;
+static i32 fcoder_metacmd_ID_select_all = 344;
+static i32 fcoder_metacmd_ID_select_next_scope_absolute = 345;
+static i32 fcoder_metacmd_ID_select_next_scope_after_current = 346;
+static i32 fcoder_metacmd_ID_select_prev_scope_absolute = 347;
+static i32 fcoder_metacmd_ID_select_prev_top_most_scope = 348;
+static i32 fcoder_metacmd_ID_select_surrounding_scope = 349;
+static i32 fcoder_metacmd_ID_select_surrounding_scope_maximal = 350;
+static i32 fcoder_metacmd_ID_set_eol_mode_from_contents = 351;
+static i32 fcoder_metacmd_ID_set_eol_mode_to_binary = 352;
+static i32 fcoder_metacmd_ID_set_eol_mode_to_crlf = 353;
+static i32 fcoder_metacmd_ID_set_eol_mode_to_lf = 354;
+static i32 fcoder_metacmd_ID_set_face_size = 355;
+static i32 fcoder_metacmd_ID_set_face_size_this_buffer = 356;
+static i32 fcoder_metacmd_ID_set_mark = 357;
+static i32 fcoder_metacmd_ID_set_mode_to_notepad_like = 358;
+static i32 fcoder_metacmd_ID_set_mode_to_original = 359;
+static i32 fcoder_metacmd_ID_setup_build_bat = 360;
+static i32 fcoder_metacmd_ID_setup_build_bat_and_sh = 361;
+static i32 fcoder_metacmd_ID_setup_build_sh = 362;
+static i32 fcoder_metacmd_ID_setup_new_project = 363;
+static i32 fcoder_metacmd_ID_show_filebar = 364;
+static i32 fcoder_metacmd_ID_show_scrollbar = 365;
+static i32 fcoder_metacmd_ID_show_the_log_graph = 366;
+static i32 fcoder_metacmd_ID_snipe_backward_whitespace_or_token_boundary = 367;
+static i32 fcoder_metacmd_ID_snipe_forward_whitespace_or_token_boundary = 368;
+static i32 fcoder_metacmd_ID_snippet_lister = 369;
+static i32 fcoder_metacmd_ID_string_repeat = 370;
+static i32 fcoder_metacmd_ID_suppress_mouse = 371;
+static i32 fcoder_metacmd_ID_swap_panels = 372;
+static i32 fcoder_metacmd_ID_theme_lister = 373;
+static i32 fcoder_metacmd_ID_to_lowercase = 374;
+static i32 fcoder_metacmd_ID_to_uppercase = 375;
+static i32 fcoder_metacmd_ID_toggle_filebar = 376;
+static i32 fcoder_metacmd_ID_toggle_fps_meter = 377;
+static i32 fcoder_metacmd_ID_toggle_fullscreen = 378;
+static i32 fcoder_metacmd_ID_toggle_highlight_enclosing_scopes = 379;
+static i32 fcoder_metacmd_ID_toggle_highlight_line_at_cursor = 380;
+static i32 fcoder_metacmd_ID_toggle_line_numbers = 381;
+static i32 fcoder_metacmd_ID_toggle_line_wrap = 382;
+static i32 fcoder_metacmd_ID_toggle_mouse = 383;
+static i32 fcoder_metacmd_ID_toggle_paren_matching_helper = 384;
+static i32 fcoder_metacmd_ID_toggle_show_whitespace = 385;
+static i32 fcoder_metacmd_ID_toggle_virtual_whitespace = 386;
+static i32 fcoder_metacmd_ID_tutorial_maximize = 387;
+static i32 fcoder_metacmd_ID_tutorial_minimize = 388;
+static i32 fcoder_metacmd_ID_uncomment_line = 389;
+static i32 fcoder_metacmd_ID_undo = 390;
+static i32 fcoder_metacmd_ID_undo_all_buffers = 391;
+static i32 fcoder_metacmd_ID_view_buffer_other_panel = 392;
+static i32 fcoder_metacmd_ID_view_jump_list_with_lister = 393;
+static i32 fcoder_metacmd_ID_word_complete = 394;
+static i32 fcoder_metacmd_ID_word_complete_drop_down = 395;
+static i32 fcoder_metacmd_ID_write_block = 396;
+static i32 fcoder_metacmd_ID_write_hack = 397;
+static i32 fcoder_metacmd_ID_write_note = 398;
+static i32 fcoder_metacmd_ID_write_space = 399;
+static i32 fcoder_metacmd_ID_write_text_and_auto_indent = 400;
+static i32 fcoder_metacmd_ID_write_text_input = 401;
+static i32 fcoder_metacmd_ID_write_todo = 402;
+static i32 fcoder_metacmd_ID_write_underscore = 403;
+static i32 fcoder_metacmd_ID_write_zero_struct = 404;
 #endif

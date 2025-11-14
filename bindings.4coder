@@ -46,6 +46,7 @@ keys_global =
     { "long_execute_any_cli",                  "Z", "Alt"          },
     { "execute_previous_cli",                  "Z", "Alt", "Shift" },
     { "long_command_lister",                   "X", "Alt"          },
+    { "long_global_settings_lister",           "M", "Control"      },
     
     // NOTE(rjf): Project
     { "long_build_in_build_panel",             "M", "Alt"          },

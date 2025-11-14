@@ -4898,6 +4898,64 @@ CUSTOM_DOC("Opens file explorer in cmd")
     exec_system_command(app, 0, buffer_identifier(0), hot, S8Lit("explorer ."), 0);
 }
 
+CUSTOM_COMMAND_SIG(long_global_settings_lister)
+CUSTOM_DOC("Lists all global settings")
+{
+    Scratch_Block scratch(app);
+    Lister_Block lister(app, scratch);
+    lister_set_query(lister, "Global Settings:");
+    lister_set_default_handlers(lister);
+    
+    Long_Lister_AddVars(app, lister, S8Lit("use_file_bars"));
+    Long_Lister_AddVars(app, lister, S8Lit("use_error_highlight"));
+    Long_Lister_AddVars(app, lister, S8Lit("use_jump_highlight"));
+    Long_Lister_AddVars(app, lister, S8Lit("use_scope_highlight"));
+    Long_Lister_AddVars(app, lister, S8Lit("use_paren_helper"));
+    Long_Lister_AddVars(app, lister, S8Lit("use_comment_keywords"));
+    
+    Long_Lister_AddVars(app, lister, S8Lit("show_line_number_margins"));
+    Long_Lister_AddVars(app, lister, S8Lit("long_show_line_number_offset"));
+    Long_Lister_AddVars(app, lister, S8Lit("long_global_show_whitespace"));
+    
+    Long_Lister_AddVars(app, lister, S8Lit("enable_output_wrapping"));
+    Long_Lister_AddVars(app, lister, S8Lit("enable_code_wrapping"));
+    Long_Lister_AddVars(app, lister, S8Lit("enable_undo_fade_out"));
+    Long_Lister_AddVars(app, lister, S8Lit("enable_virtual_whitespace"));
+    
+    REPEAT:
+    Lister_Result result = Long_Lister_Run(app, lister);
+    if (Long_Lister_IsResultValid(result))
+    {
+        String_ID config_id = (String_ID)((Long_Lister_Data*)result.user_data)->user_index;
+        def_set_config_b32(config_id, !def_get_config_b32(config_id));
+        goto REPEAT;
+    }
+    else return;
+}
+
+CUSTOM_COMMAND_SIG(long_buffer_settings_lister)
+CUSTOM_DOC("Lists all global settings")
+{
+    Scratch_Block scratch(app);
+    Lister_Block lister(app, scratch);
+    lister_set_query(lister, "Buffer Settings:");
+    lister_set_default_handlers(lister);
+    
+    //Long_Lister_AddVars(app, lister, ViewSetting_ShowWhitespace);
+    //Long_Lister_AddVars(app, lister, ViewSetting_ShowFileBar);
+    //Long_Lister_AddVars(app, lister, font_size);
+    
+    REPEAT:
+    Lister_Result result = Long_Lister_Run(app, lister);
+    if (Long_Lister_IsResultValid(result))
+    {
+        String_ID config_id = (String_ID)((Long_Lister_Data*)result.user_data)->user_index;
+        def_set_config_b32(config_id, !def_get_config_b32(config_id));
+        goto REPEAT;
+    }
+    else return;
+}
+
 //~ NOTE(long): Theme Commands
 
 global Color_Table long_active_color_table;

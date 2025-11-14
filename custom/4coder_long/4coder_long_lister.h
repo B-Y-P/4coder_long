@@ -8,6 +8,7 @@ enum Long_Lister_HeaderType
     Long_Header_None,
     //Long_Header_Path,
     Long_Header_Location,
+    Long_Content_Vars,
 };
 
 struct Long_Lister_Data
@@ -32,6 +33,7 @@ global i32 long_lister_tooltip_peek = 0;
 function void Long_Lister_AddItem(Application_Links* app, Lister* lister, String8 name, String8 tag,
                                   Buffer_ID buffer, i64 pos, u64 index = 0, String8 tooltip = {});
 function void Long_Lister_AddBuffer(Application_Links* app, Lister* lister, String8 name, String8 tag, Buffer_ID buffer);
+function void Long_Lister_AddVars(Application_Links* app, Lister* lister, String8 name);
 
 function Lister_Activation_Code Long_Lister_WriteString(Application_Links* app);
 function void Long_Lister_Backspace(Application_Links* app);

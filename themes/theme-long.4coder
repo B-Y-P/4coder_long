@@ -36,7 +36,6 @@ defcolor_highlight_junk = 0xC0600000;
 defcolor_highlight_white = 0xC0006060;
 
 defcolor_bar = 0xFF888888;
-defcolor_bar_active = 0xFF666666;
 defcolor_base = 0xFF000000;
 defcolor_pop1 = 0xFF3C57DC;
 defcolor_pop2 = 0xFFFF0000;
@@ -68,20 +67,17 @@ fleury_color_index_decl                 = 0xFF9060C0;
 fleury_color_cursor_macro               = 0xFFC060C0;
 
 fleury_color_comment_user_name          = fleury_color_index_comment_tag;
+fleury_color_cursor_inactive            = 0xff008000;
+fleury_color_plot_cycle                 = { 0xff03d3fc, 0xff22b80b, 0xfff0bb0c, 0xfff0500c };
+fleury_color_token_highlight            = 0xD064FAAA;
+fleury_color_token_minor_highlight      = 0xD0759C61;
 
 //~ NOTE(long): Custom index colors
 long_color_index_local                  = 0xFF10FFFF;
 long_color_index_param                  = long_color_index_local;
 long_color_index_field                  = defcolor_text_default;
 
-//~ TODO(long): Strip power mode, plots, and lego brick out
-fleury_color_cursor_power_mode          = 0xffC82048;
-fleury_color_cursor_inactive            = 0xff008000;
-
-fleury_color_plot_cycle                 = { 0xff03d3fc, 0xff22b80b, 0xfff0bb0c, 0xfff0500c };
-fleury_color_token_highlight            = 0xD064FAAA;
-fleury_color_token_minor_highlight      = 0xD0759C61;
-
-fleury_color_lego_grab                  = 0xFF6FAFEF;
-fleury_color_lego_splat                 = 0xffefaaef;
-fleury_color_error_annotation           = 0xffff0000;
+//~ NOTE(long): Custom Slider colors
+long_color_slider_back                  = { 0xFF1A1A1A, 0xFF2C5B36 };
+long_color_slider_border                = { 0xFF424242, 0xFF568761 };
+long_color_slider_text                  = { 0xFFA4A4A4, 0xFFE3F5D3 };

@@ -287,8 +287,10 @@ function void Long_Render(Application_Links* app, Frame_Info frame, View_ID view
     Rect_f32 prev_clip = draw_set_clip(app, ctx->rect);
     
     // NOTE(long): File Bar
-    b64 showing_file_bar = false;
-    if (view_get_setting(app, view, ViewSetting_ShowFileBar, &showing_file_bar) && showing_file_bar)
+    b64 showing_file_bar = def_get_config_b32_lit("use_file_bars");
+    if (showing_file_bar)
+        view_get_setting(app, view, ViewSetting_ShowFileBar, &showing_file_bar);
+    if (showing_file_bar)
         Long_Render_FileBar(ctx);
     
     // NOTE(long): Buffer Scroll

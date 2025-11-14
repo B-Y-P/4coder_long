@@ -73,6 +73,26 @@ function void Long_Render_BorderRect(Application_Links* app, Rect_f32 rect, f32 
     Long_Render_Outline(app, rect, roundness, thickness, border_color);
 }
 
+function void Long_Render_SliderB32(Application_Links* app, Rect_f32 rect, b32 value)
+{
+    value = !!value;
+    ARGB_Color back   = Long_ARGBFromID(long_color_slider_back, value);
+    ARGB_Color border = Long_ARGBFromID(long_color_slider_border, value);
+    ARGB_Color circle = Long_ARGBFromID(long_color_slider_text, value);
+    
+    f32 min_size = Min(rect.x1 - rect.x0, rect.y1 - rect.y0);
+    Long_Render_Rect(app, rect, 50, back);
+    draw_rectangle_outline(app, rect, min_size/2.f, 2.f, border);
+    
+    Vec2_f32 circle_pos = rect.p0;
+    if (value)
+        circle_pos.x = rect.x1 - min_size;
+    
+    Rect_f32 circle_rect = Rf32_xy_wh(circle_pos, V2f32(min_size, min_size));
+    circle_rect = rect_inner(circle_rect, 3);
+    Long_Render_Rect(app, circle_rect, 50, circle);
+}
+
 function void Long_Render_RoundedRect(Application_Links* app, Rect_f32 rect, f32 thickness, f32 roundness,
                                       ARGB_Color background_color, ARGB_Color border_color)
 {
