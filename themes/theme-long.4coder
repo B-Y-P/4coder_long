@@ -79,5 +79,6 @@ long_color_index_field                  = defcolor_text_default;
 
 //~ NOTE(long): Custom Slider colors
 long_color_slider_back                  = { 0xFF1A1A1A, 0xFF2C5B36 };
+long_color_slider_pop                   = { 0xFF355B6E };
 long_color_slider_border                = { 0xFF424242, 0xFF568761 };
 long_color_slider_text                  = { 0xFFA4A4A4, 0xFFE3F5D3 };

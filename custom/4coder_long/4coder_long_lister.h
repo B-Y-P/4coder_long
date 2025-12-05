@@ -3,20 +3,29 @@
 #ifndef FCODER_LONG_LISTER_H
 #define FCODER_LONG_LISTER_H
 
-enum Long_Lister_HeaderType
+enum Long_Lister_Type
 {
-    Long_Header_None,
-    //Long_Header_Path,
-    Long_Header_Location,
-    Long_Content_Vars,
+    Long_Lister_Header = 1 << 0,
+    Long_Lister_Slider = 1 << 1,
+    Long_Lister_Switch = 1 << 2,
+};
+
+enum Long_Item_Type
+{
+    Long_Item_None,
+    Long_Item_Config,
+    Long_Item_Pointer,
+    Long_Item_Attachment,
+    Long_Item_ViewSetting,
 };
 
 struct Long_Lister_Data
 {
-    Long_Lister_HeaderType type;
-    Buffer_ID buffer;
-    i64 pos;
-    i64 user_index;
+    Long_Lister_Type type;
+    Long_Item_Type item_type;
+    Range_i64 range;
+    u64 id;
+    u64 user;
     String8 tooltip;
 };
 
@@ -30,10 +39,11 @@ enum Long_Lister_TooltipType
 
 global i32 long_lister_tooltip_peek = 0;
 
-function void Long_Lister_AddItem(Application_Links* app, Lister* lister, String8 name, String8 tag,
+function Long_Lister_Data* Long_Lister_AddItem(Lister* lister, String8 name, String8 tag);
+function void Long_Lister_AddItem(Lister* lister, String8 name, String8 tag,
                                   Buffer_ID buffer, i64 pos, u64 index = 0, String8 tooltip = {});
-function void Long_Lister_AddBuffer(Application_Links* app, Lister* lister, String8 name, String8 tag, Buffer_ID buffer);
-function void Long_Lister_AddVars(Application_Links* app, Lister* lister, String8 name);
+function void Long_Lister_AddSwitch(Lister* lister, String8 name, Long_Item_Type type, u64 user = 0);
+function void Long_Lister_AddSlider(Lister* lister, String8 name, Range_i64 range);
 
 function Lister_Activation_Code Long_Lister_WriteString(Application_Links* app);
 function void Long_Lister_Backspace(Application_Links* app);

@@ -64,6 +64,7 @@ fleury_color_lego_grab = managed_id_declare(app, string_u8_litexpr("colors"), st
 fleury_color_lego_splat = managed_id_declare(app, string_u8_litexpr("colors"), string_u8_litexpr("fleury_color_lego_splat"));
 fleury_color_error_annotation = managed_id_declare(app, string_u8_litexpr("colors"), string_u8_litexpr("fleury_color_error_annotation"));
 long_color_slider_back = managed_id_declare(app, string_u8_litexpr("colors"), string_u8_litexpr("long_color_slider_back"));
+long_color_slider_pop = managed_id_declare(app, string_u8_litexpr("colors"), string_u8_litexpr("long_color_slider_pop"));
 long_color_slider_border = managed_id_declare(app, string_u8_litexpr("colors"), string_u8_litexpr("long_color_slider_border"));
 long_color_slider_text = managed_id_declare(app, string_u8_litexpr("colors"), string_u8_litexpr("long_color_slider_text"));
 long_highlight_list = managed_id_declare(app, string_u8_litexpr("attachment"), string_u8_litexpr("long_highlight_list"));

@@ -69,12 +69,16 @@ function void   Long_Print_Errorf(Application_Links* app, char* fmt, ...);
 #define vars_b32_from_key(var, key) vars_b32_from_var(vars_read_key(var, key))
 #define vars_b32_from_key_lit(var, key) vars_b32_from_var(vars_read_key_lit(var, key))
 
+#define def_get_config_u64_lit(app, key) def_get_config_u64(app, vars_save_string_lit(key))
+#define def_get_config_f32_lit(app, key) ((f32)def_get_config_u64((app), vars_save_string_lit(key)))
+#define def_get_config_str_lit(arena, key) def_get_config_string(arena, vars_save_string_lit(key))
 #define def_get_config_b32_lit(key) def_get_config_b32(vars_save_string_lit(key))
+
+#define def_set_config_u64_lit(app, key, val) def_set_config_u64(app, vars_save_string_lit(key), (u64)(val))
+#define def_set_config_str_lit(key, val) def_set_config_string(vars_save_string_lit(key), (val))
+#define def_set_config_b32_lit(key, val) def_set_config_b32(vars_save_string_lit(key), (b32)(val))
 #define def_toggle_config_b32_lit(key) Stmnt(String_ID __id__ = vars_save_string_lit(key); \
                                              def_set_config_b32(__id__, !def_get_config_b32(__id__));)
-#define def_get_config_u64_lit(app, key) def_get_config_u64(app, vars_save_string_lit(key))
-#define def_get_config_str_lit(arena, key) def_get_config_string(arena, vars_save_string_lit(key))
-#define def_get_config_f32_lit(app, key) ((f32)def_get_config_u64((app), vars_save_string_lit(key)))
 
 function void    Long_Vars_Append(Application_Links* app, Arena* arena, String8List*  list, Variable_Handle var, i32 indent);
 function String8 Long_Vars_StrFromArray(Application_Links* app, Arena* arena, Variable_Handle var, i32 indent, String8List ignore = {});

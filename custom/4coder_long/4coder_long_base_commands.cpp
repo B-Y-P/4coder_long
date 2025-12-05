@@ -483,7 +483,7 @@ CUSTOM_DOC("List jump history")
         line = string_skip_chop_whitespace(line);
         
         String8 tag = (i == stack->curr) ? S8Lit("current") : String8{};
-        Long_Lister_AddItem(app, lister, line, tag, buffer, pos, i);
+        Long_Lister_AddItem(lister, line, tag, buffer, pos, i);
     }
     
     lister_set_query(lister, push_u8_stringf(scratch, "Top: %u, Bot: %u, Current: %u", stack->top, stack->bot, stack->curr));
@@ -493,10 +493,10 @@ CUSTOM_DOC("List jump history")
     if (Long_Lister_IsResultValid(l_result))
         block_copy_struct(&result, (Long_Lister_Data*)l_result.user_data);
     
-    if (result.buffer != 0)
+    if (result.id != 0)
     {
-        Long_Jump_ToLocation(app, get_this_ctx_view(app, Access_Always), result.buffer, result.pos);
-        Long_PointStack_SetCurrent(stack, (u32)result.user_index);
+        Long_Jump_ToLocation(app, get_this_ctx_view(app, Access_Always), (Buffer_ID)result.id, result.range.min);
+        Long_PointStack_SetCurrent(stack, (u32)result.user);
     }
 }
 
@@ -589,8 +589,9 @@ function void Long_Buffer_OutputBuffer(Application_Links* app, Lister* lister, B
     String8 filepath = Long_Prj_RelBufferName(app, scratch, buffer);
     if (filepath.size)
         status = push_stringf(scratch, "<%.*s>%s%.*s", string_expand(filepath), dirty ? " " : "", string_expand(status));
-    //lister_add_item(lister, buffer_name, status, IntAsPtr(buffer), 0);
-    Long_Lister_AddBuffer(app, lister, buffer_name, status, buffer);
+    
+    Long_Lister_Data* data = Long_Lister_AddItem(lister, buffer_name, status);
+    data->id = buffer;
 }
 
 // @COPYPASTA(long): generate_all_buffers_list
@@ -649,7 +650,7 @@ function Buffer_ID Long_Buffer_RunLister(Application_Links* app, String8 query)
     Lister_Result l_result = run_lister_with_refresh_handler(app, scratch, query, handlers);
     Buffer_ID result = 0;
     if (Long_Lister_IsResultValid(l_result))
-        result = ((Long_Lister_Data*)l_result.user_data)->buffer;
+        result = (Buffer_ID)((Long_Lister_Data*)l_result.user_data)->id;
     return result;
 }
 
@@ -679,7 +680,7 @@ CUSTOM_DOC("When executed on a buffer with jumps, creates a persistent lister fo
                 String8 line = Long_Buffer_PushLine(app, scratch, buffer, pos);
                 line = string_condense_whitespace(scratch, line);
                 line = string_skip_chop_whitespace(line);
-                Long_Lister_AddItem(app, lister, line, {}, buffer, pos, i);
+                Long_Lister_AddItem(lister, line, {}, buffer, pos, i);
             }
         }
         
@@ -687,7 +688,7 @@ CUSTOM_DOC("When executed on a buffer with jumps, creates a persistent lister fo
         if (Long_Lister_IsResultValid(l_result))
         {
             jump.success = true;
-            jump.index = (i32)((Long_Lister_Data*)l_result.user_data)->user_index;
+            jump.index = (i32)((Long_Lister_Data*)l_result.user_data)->user;
         }
         
         jump_to_jump_lister_result(app, view, list, &jump);
@@ -883,7 +884,7 @@ CUSTOM_DOC("Opens an interactive list of the current buffer history.")
                 tag = S8Lit("saved");
         }
         
-        Long_Lister_AddItem(app, lister, line, tag, buffer, record.pos_before_edit, i);
+        Long_Lister_AddItem(lister, line, tag, buffer, record.pos_before_edit, i);
     }
     
     lister_set_query(lister, push_u8_stringf(scratch, "Max: %d, Current: %d, Saved: (%d, %d)",
@@ -892,7 +893,7 @@ CUSTOM_DOC("Opens an interactive list of the current buffer history.")
     Lister_Result l_result = Long_Lister_Run(app, lister);
     if (Long_Lister_IsResultValid(l_result))
     {
-        History_Record_Index index = (History_Record_Index)((Long_Lister_Data*)l_result.user_data)->user_index;
+        History_Record_Index index = (History_Record_Index)((Long_Lister_Data*)l_result.user_data)->user;
         Assert(index >= 0 && index <= max);
         if (index != current)
         {
@@ -1490,8 +1491,7 @@ function void Long_MC_ListAllLocations(Application_Links* app, View_ID view, Buf
     Command_Map* map = Long_Mapping_GetMap(app, view, &mapping);
     
     b32 abort = false, exit_to_jump_highlight = false;
-    String_ID jump_highlight_id = vars_save_string_lit("use_jump_highlight");
-    def_set_config_b32(jump_highlight_id, 0);
+    def_set_config_b32_lit("use_jump_highlight", 0);
     
     b32 select_all = 0;
     for (Temp_Memory temp = begin_temp(scratch); ; end_temp(temp))
@@ -1625,7 +1625,7 @@ function void Long_MC_ListAllLocations(Application_Links* app, View_ID view, Buf
     }
     
     if (exit_to_jump_highlight)
-        def_set_config_b32(jump_highlight_id, 1);
+        def_set_config_b32_lit("use_jump_highlight", 1);
     else
         long_kill_search_buffer(app);
     
@@ -2019,6 +2019,11 @@ function b32 Long_Query_General(Application_Links* app, Query_Bar* bar, String8 
     Mapping* mapping = 0;
     Command_Map* map = 0;
     
+    u64 max_value = 1;
+    for (u64 i = 0; i < bar->string_capacity; ++i)
+        max_value *= 10;
+    max_value -= 1;
+    
     b32 success = 1;
     for (;;)
     {
@@ -2029,16 +2034,42 @@ function b32 Long_Query_General(Application_Links* app, Query_Bar* bar, String8 
             break;
         }
         
+        i64 dir = 1;
         u64 old_size = bar->string.size;
         if (match_key_code(&in, KeyCode_Return))
             break;
+        
+        else if (force_radix && match_key_code(&in, KeyCode_Up))
+        {
+            CHANGE_INT:
+            u64 old_value = string_to_integer(bar->string, force_radix);
+            u64 new_value;
+            
+            if (dir < 0 && old_value == 0)
+                new_value = max_value;
+            else if (dir > 0 && old_value == max_value)
+                new_value = 0;
+            else
+                new_value = old_value + dir;
+            
+            Scratch_Block scratch(app);
+            String8 new_str = string_from_integer(scratch, new_value, force_radix);
+            bar->string.size = 0;
+            Long_Query_AppendBar(bar, new_str);
+        }
+        
+        else if (force_radix && match_key_code(&in, KeyCode_Down))
+        {
+            dir = -1;
+            goto CHANGE_INT;
+        }
         
         else if (Long_Query_DefaultInput(app, bar, view, &in))
         {
             if (force_radix && bar->string.size > old_size)
             {
                 String8 new_str = string_skip(bar->string, old_size);
-                if (!string_is_integer(new_str, 10))
+                if (!string_is_integer(new_str, force_radix))
                     bar->string.size = old_size;
             }
         }
@@ -2079,7 +2110,7 @@ function String8 Long_Query_String(Application_Links* app, Arena* arena, char* p
     return Long_Query_StringEx(app, arena, prompt, string_space, string_size, init);
 }
 
-function i64 Long_Query_Number(Application_Links* app, char* prompt, u64 max_digit)
+function i64 Long_Query_Number(Application_Links* app, char* prompt, u64 max_digit, String8 init = {})
 {
     Scratch_Block scratch(app);
     i64 result = 0;
@@ -2090,7 +2121,7 @@ function i64 Long_Query_Number(Application_Links* app, char* prompt, u64 max_dig
     if (bar)
     {
         bar->string_capacity = max_digit;
-        if (Long_Query_General(app, bar, {}, 10))
+        if (Long_Query_General(app, bar, init, 10))
             result = string_to_integer(bar->string, 10);
         end_query_bar(app, bar, 0);
     }
@@ -2841,7 +2872,7 @@ CUSTOM_DOC("Goes to the jump location at the cursor or the definition of the ide
 function String8 Long_Note_PushTag(Application_Links* app, Arena* arena, F4_Index_Note* note)
 {
     String8 result = S8Lit("");
-    switch(note->kind)
+    switch (note->kind)
     {
         case F4_Index_NoteKind_Type:
         {
@@ -2984,7 +3015,7 @@ function void Long_Lister_PushIndexNote(Application_Links* app, Arena* arena, Li
         String8 string = string_list_flatten(arena, list, S8Lit(" "), 0, 0);
         string = string_condense_whitespace(scratch, string);
         
-        Long_Lister_AddItem(app, lister, string, Long_Note_PushTag(app, arena, note), buffer, note->range.first);
+        Long_Lister_AddItem(lister, string, Long_Note_PushTag(app, arena, note), buffer, note->range.first);
     }
     
     Long_Index_IterateValidNoteInFile(child, note)
@@ -3018,9 +3049,10 @@ function void Long_SearchDefinition(Application_Links* app, NoteFilter* filter, 
     Long_Lister_Data result = {};
     if (Long_Lister_IsResultValid(l_result))
         block_copy_struct(&result, (Long_Lister_Data*)l_result.user_data);
-    if (result.buffer != 0)
+    
+    if (result.id != 0)
     {
-        Long_PointStack_Jump(app, view, result.buffer, result.pos);
+        Long_PointStack_Jump(app, view, (Buffer_ID)result.id, result.range.min);
         Long_View_Snap(app, view);
     }
 }
@@ -4713,14 +4745,18 @@ function void Long_Config_ApplyFromData(Application_Links* app, String8 data, i3
 {
     Scratch_Block scratch(app);
     
-    Variable_Handle cfg_var = {};
     if (data.size)
     {
         Config* parsed = def_config_from_text(app, scratch, S8Lit("config.4coder"), data);
         String8 error_str = config_stringize_errors(app, scratch, parsed);
         
         if (!error_str.size)
-            cfg_var = def_fill_var_from_config(app, vars_get_root(), vars_save_string_lit("def_config"), parsed);
+        {
+            def_fill_var_from_config(app, vars_get_root(), vars_save_string_lit("def_config"), parsed);
+            // TODO(long): This is a hack, fix it
+            // https://discord.com/channels/657067375681863699/657068067368599563/1439919458406764564
+            def_fill_var_from_config(app, vars_get_root(), def_config_lookup_table[0], parsed);
+        }
         else
             Long_Print_Errorf(app, "trying to load config file:\n%.*s", string_expand(error_str));
     }
@@ -4731,7 +4767,7 @@ function void Long_Config_ApplyFromData(Application_Links* app, String8 data, i3
         Face_Description description = get_global_face_description(app);
         String8 filename = description.font.file_name;
         if (filename.size)
-            def_set_config_string(vars_save_string_lit("default_font_name"), filename);
+            def_set_config_str_lit("default_font_name", filename);
     }
     
     // Apply config
@@ -4837,13 +4873,13 @@ function Custom_Command_Function* Long_Lister_GetCommand(Application_Links* app,
         // NOTE(long): fcoder_metacmd_table[j].description_len isn't escaped correctly
         // (e.g "\n" is 2 bytes rather than 1) but is probably null-terminated.
         String8 tooltip = SCu8(fcoder_metacmd_table[j].description);
-        Long_Lister_AddItem(app, lister, name, status, 0, 0, PtrAsInt(proc), tooltip);
+        Long_Lister_AddItem(lister, name, status, 0, 0, PtrAsInt(proc), tooltip);
     }
     
     Lister_Result l_result = Long_Lister_Run(app, lister);
     Custom_Command_Function* result = 0;
     if (Long_Lister_IsResultValid(l_result))
-        result = (Custom_Command_Function*)IntAsPtr(((Long_Lister_Data*)l_result.user_data)->user_index);
+        result = (Custom_Command_Function*)IntAsPtr(((Long_Lister_Data*)l_result.user_data)->user);
     return result;
 }
 
@@ -4906,31 +4942,53 @@ CUSTOM_DOC("Lists all global settings")
     lister_set_query(lister, "Global Settings:");
     lister_set_default_handlers(lister);
     
-    Long_Lister_AddVars(app, lister, S8Lit("use_file_bars"));
-    Long_Lister_AddVars(app, lister, S8Lit("use_error_highlight"));
-    Long_Lister_AddVars(app, lister, S8Lit("use_jump_highlight"));
-    Long_Lister_AddVars(app, lister, S8Lit("use_scope_highlight"));
-    Long_Lister_AddVars(app, lister, S8Lit("use_paren_helper"));
-    Long_Lister_AddVars(app, lister, S8Lit("use_comment_keywords"));
+    //- long: Tooltip
+    Long_Lister_AddSlider(lister, S8Lit("tooltip_padding"  ), Ii64(0, 20));
+    Long_Lister_AddSlider(lister, S8Lit("tooltip_thickness"), Ii64(0, 20));
+    Long_Lister_AddSlider(lister, S8Lit("tooltip_roundness"), Ii64(0, 50));
     
-    Long_Lister_AddVars(app, lister, S8Lit("show_line_number_margins"));
-    Long_Lister_AddVars(app, lister, S8Lit("long_show_line_number_offset"));
-    Long_Lister_AddVars(app, lister, S8Lit("long_global_show_whitespace"));
+    Long_Lister_AddSwitch(lister, S8Lit("Mouse Suppression"), Long_Item_Pointer, (u64)&suppressing_mouse);
+    Long_Lister_AddSwitch(lister, S8Lit("Show FPS"), Long_Item_Pointer, (u64)&show_fps_hud);
     
-    Long_Lister_AddVars(app, lister, S8Lit("enable_output_wrapping"));
-    Long_Lister_AddVars(app, lister, S8Lit("enable_code_wrapping"));
-    Long_Lister_AddVars(app, lister, S8Lit("enable_undo_fade_out"));
-    Long_Lister_AddVars(app, lister, S8Lit("enable_virtual_whitespace"));
+    //- long: Cursor
+    Long_Lister_AddSwitch(lister, S8Lit("Notepad Mode"), Long_Item_Pointer, (u64)&fcoder_mode);
+    Long_Lister_AddSlider(lister, S8Lit("cursor_roundness"), Ii64(0, 50));
+    Long_Lister_AddSlider(lister, S8Lit(  "mark_thickness"), Ii64(0, 100));
     
-    REPEAT:
-    Lister_Result result = Long_Lister_Run(app, lister);
-    if (Long_Lister_IsResultValid(result))
-    {
-        String_ID config_id = (String_ID)((Long_Lister_Data*)result.user_data)->user_index;
-        def_set_config_b32(config_id, !def_get_config_b32(config_id));
-        goto REPEAT;
-    }
-    else return;
+    //- long:
+    Long_Lister_AddSlider(lister, S8Lit("default_font_size"), LONG_FONT_SIZE_RANGE);
+    Long_Lister_AddSlider(lister, S8Lit("lister_roundness"), Ii64(0, 100));
+    
+    //- long:
+    Long_Lister_AddSwitch(lister, S8Lit("use_file_bars"       ), Long_Item_Config);
+    Long_Lister_AddSwitch(lister, S8Lit("use_error_highlight" ), Long_Item_Config);
+    Long_Lister_AddSwitch(lister, S8Lit("use_jump_highlight"  ), Long_Item_Config);
+    Long_Lister_AddSwitch(lister, S8Lit("use_scope_highlight" ), Long_Item_Config);
+    Long_Lister_AddSwitch(lister, S8Lit("use_paren_helper"    ), Long_Item_Config);
+    Long_Lister_AddSwitch(lister, S8Lit("use_comment_keywords"), Long_Item_Config);
+    
+    //- long: Line Margin
+    Long_Lister_AddSwitch(lister, S8Lit("show_line_number_margins"), Long_Item_Config);
+    Long_Lister_AddSwitch(lister, S8Lit("long_show_line_number_offset"), Long_Item_Config);
+    
+    //- long: Long Config
+    Long_Lister_AddSwitch(lister, S8Lit("long_global_show_whitespace"), Long_Item_Config);
+    Long_Lister_AddSlider(lister, S8Lit("long_margin_size"), Ii64(0, 20));
+    Long_Lister_AddSlider(lister, S8Lit("long_code_peek_height"), Ii64(5, 100));
+    
+    //- long:
+    Long_Lister_AddSwitch(lister, S8Lit("enable_output_wrapping"), Long_Item_Config);
+    Long_Lister_AddSwitch(lister, S8Lit("enable_code_wrapping"), Long_Item_Config);
+    Long_Lister_AddSwitch(lister, S8Lit("enable_undo_fade_out"), Long_Item_Config);
+    Long_Lister_AddSwitch(lister, S8Lit("enable_virtual_whitespace"), Long_Item_Config);
+    Long_Lister_AddSlider(lister, S8Lit("virtual_whitespace_regular_indent"), Ii64(0, 16));
+    
+    //- long: Indentation
+    Long_Lister_AddSwitch(lister, S8Lit("indent_with_tabs"), Long_Item_Config);
+    Long_Lister_AddSlider(lister, S8Lit("indent_width"), Ii64(0, 16));
+    Long_Lister_AddSlider(lister, S8Lit("default_tab_width"), Ii64(0, 16));
+    
+    Long_Lister_Run(app, lister);
 }
 
 CUSTOM_COMMAND_SIG(long_buffer_settings_lister)
@@ -4941,19 +4999,75 @@ CUSTOM_DOC("Lists all global settings")
     lister_set_query(lister, "Buffer Settings:");
     lister_set_default_handlers(lister);
     
-    //Long_Lister_AddVars(app, lister, ViewSetting_ShowWhitespace);
-    //Long_Lister_AddVars(app, lister, ViewSetting_ShowFileBar);
-    //Long_Lister_AddVars(app, lister, font_size);
+    Long_Lister_AddSwitch(lister, S8Lit("Show Whitespace"), Long_Item_ViewSetting, (u64)ViewSetting_ShowWhitespace);
+    Long_Lister_AddSwitch(lister, S8Lit("Show File Bar"), Long_Item_ViewSetting, (u64)ViewSetting_ShowFileBar);
+    // TODO(long): Font Size
     
-    REPEAT:
-    Lister_Result result = Long_Lister_Run(app, lister);
-    if (Long_Lister_IsResultValid(result))
+    Long_Lister_Run(app, lister);
+}
+
+CUSTOM_COMMAND_SIG(long_set_face_size)
+CUSTOM_DOC("Set face size of the face used by the current buffer.")
+{
+    Scratch_Block scratch(app);
+    u64 font_size = def_get_config_u64_lit(app, "default_font_size");
+    String8 init = push_stringf(scratch, "%llu", font_size);
+    
+    i64 result = Long_Query_Number(app, "Face Size: ", 3, init);
+    if (range_contains_inclusive(LONG_FONT_SIZE_RANGE, result))
+        def_set_config_u64_lit(app, "default_font_size", result);
+}
+
+CUSTOM_COMMAND_SIG(long_set_face_size_this_buffer)
+CUSTOM_DOC("Set face size of the face used by the current buffer; if any other buffers are using the same face a new face is created so that only this buffer is effected")
+{
+    View_ID view = get_active_view(app, 0);
+    Buffer_ID buffer = view_get_buffer(app, view, 0);
+    Face_ID face = get_face_id(app, buffer);
+    
+    b32 is_shared = 0;
+    for (Buffer_ID buf = get_buffer_next(app, 0, 0); buf && !is_shared; buf = get_buffer_next(app, buf, 0))
     {
-        String_ID config_id = (String_ID)((Long_Lister_Data*)result.user_data)->user_index;
-        def_set_config_b32(config_id, !def_get_config_b32(config_id));
-        goto REPEAT;
+        if (buf == buffer)
+            continue;
+        is_shared = get_face_id(app, buf) == face;
     }
-    else return;
+    
+    if (is_shared)
+    {
+        Face_Description description = get_face_description(app, face);
+        face = try_create_new_face(app, &description);
+        if (face != 0)
+            buffer_set_face(app, buffer, face);
+    }
+    
+    long_set_face_size(app);
+}
+
+CUSTOM_COMMAND_SIG(long_mouse_wheel_change_face_size)
+CUSTOM_DOC("Reads the state of the mouse wheel and uses it to either increase or decrease the face size.")
+{
+    local_persist u64 next_resize_time = 0;
+    local_persist i32 prev_mouse_wheel = 0;
+    u64 now = system_now_time();
+    
+    if (now >= next_resize_time)
+    {
+        next_resize_time = now + 50*1000;
+        Mouse_State mouse = get_mouse_state(app);
+        i32 delta = clamp(-1, mouse.wheel, +1) * -1;
+        
+        if (delta != 0)
+        {
+            String_ID global_face = vars_save_string_lit("default_font_size");
+            u64 global_size = def_get_config_u64(app, global_face) + delta;
+            def_set_config_u64(app, global_face, global_size);
+            
+            Face_Description desc = get_face_description(app, global_small_code_face);
+            desc.parameters.pt_size = (u32)global_size - LONG_SMALL_FONT_SIZE_OFFSET;
+            try_modify_face(app, global_small_code_face, &desc);
+        }
+    }
 }
 
 //~ NOTE(long): Theme Commands

@@ -24,6 +24,7 @@ struct Long_Render_Context
 };
 
 CUSTOM_ID(colors, long_color_slider_back);
+CUSTOM_ID(colors, long_color_slider_pop);
 CUSTOM_ID(colors, long_color_slider_border);
 CUSTOM_ID(colors, long_color_slider_text);
 

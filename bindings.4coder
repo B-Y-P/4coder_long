@@ -43,10 +43,11 @@ keys_global =
     { "long_point_lister",                     "L", "Control"      },
     
     // NOTE(long): Commands
-    { "long_execute_any_cli",                  "Z", "Alt"          },
-    { "execute_previous_cli",                  "Z", "Alt", "Shift" },
-    { "long_command_lister",                   "X", "Alt"          },
-    { "long_global_settings_lister",           "M", "Control"      },
+    { "long_execute_any_cli",                  "Z", "Alt"              },
+    { "execute_previous_cli",                  "Z", "Alt",     "Shift" },
+    { "long_command_lister",                   "X", "Alt"              },
+    { "long_global_settings_lister",           "M", "Control"          },
+    { "long_buffer_settings_lister",           "M", "Control", "Shift" },
     
     // NOTE(rjf): Project
     { "long_build_in_build_panel",             "M", "Alt"          },

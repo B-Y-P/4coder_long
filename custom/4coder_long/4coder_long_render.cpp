@@ -73,7 +73,7 @@ function void Long_Render_BorderRect(Application_Links* app, Rect_f32 rect, f32 
     Long_Render_Outline(app, rect, roundness, thickness, border_color);
 }
 
-function void Long_Render_SliderB32(Application_Links* app, Rect_f32 rect, b32 value)
+function void Long_Render_Switch(Application_Links* app, Rect_f32 rect, b32 value)
 {
     value = !!value;
     ARGB_Color back   = Long_ARGBFromID(long_color_slider_back, value);
@@ -90,6 +90,28 @@ function void Long_Render_SliderB32(Application_Links* app, Rect_f32 rect, b32 v
     
     Rect_f32 circle_rect = Rf32_xy_wh(circle_pos, V2f32(min_size, min_size));
     circle_rect = rect_inner(circle_rect, 3);
+    Long_Render_Rect(app, circle_rect, 50, circle);
+}
+
+function void Long_Render_Slider(Application_Links* app, Rect_f32 rect, f32 value)
+{
+    ARGB_Color back   = Long_ARGBFromID(long_color_slider_back);
+    ARGB_Color filled = Long_ARGBFromID(long_color_slider_pop);
+    ARGB_Color border = Long_ARGBFromID(long_color_slider_border);
+    ARGB_Color circle = Long_ARGBFromID(long_color_slider_text);
+    
+    f32 height = rect.y1 - rect.y0;
+    Long_Render_Rect(app, rect, 50, back);
+    draw_rectangle_outline(app, rect, height/2.f, 2.f, border);
+    
+    Vec2_f32 circle_pos = V2f32(lerp(rect.x0, value, rect.x1 - height), rect.y0);
+    Rect_f32 circle_rect = Rf32_xy_wh(circle_pos, V2f32(height, height));
+    Rect_f32 filled_rect = rect;
+    
+    filled_rect.x1 = circle_rect.x1;
+    circle_rect = rect_inner(circle_rect, 3);
+    
+    Long_Render_Rect(app, filled_rect, 50, filled);
     Long_Render_Rect(app, circle_rect, 50, circle);
 }
 

@@ -223,6 +223,8 @@ CUSTOM_DOC("Input consumption loop for default view behavior")
 
 //~ NOTE(rjf): Tick Hook
 
+global u64 long_virtual_indent;
+
 // @COPYPASTA(long): F4_Tick
 function void Long_Tick(Application_Links* app, Frame_Info frame)
 {
@@ -242,6 +244,30 @@ function void Long_Tick(Application_Links* app, Frame_Info frame)
     
     // NOTE(rjf): Default tick stuff from the 4th dimension:
     default_tick(app, frame);
+    
+    u64 vw_indent = def_get_config_u64_lit(app, "virtual_whitespace_regular_indent");
+    if (vw_indent != long_virtual_indent)
+    {
+        long_virtual_indent = vw_indent;
+        clear_all_layouts(app);
+    }
+    
+    system_show_mouse_cursor(!suppressing_mouse);
+    
+    u32 font_size = (u32)def_get_config_u64_lit(app, "default_font_size");
+    Face_Description desc = get_global_face_description(app);
+    if (font_size != desc.parameters.pt_size)
+    {
+        desc.parameters.pt_size = font_size;
+        modify_global_face_by_description(app, desc);
+    }
+    
+    Face_Description small_desc = get_face_description(app, global_small_code_face);
+    if (small_desc.parameters.pt_size != font_size - LONG_SMALL_FONT_SIZE_OFFSET)
+    {
+        small_desc.parameters.pt_size = font_size - LONG_SMALL_FONT_SIZE_OFFSET;
+        try_modify_face(app, global_small_code_face, &small_desc);
+    }
     
     MC_tick_inner(app, frame);
 }

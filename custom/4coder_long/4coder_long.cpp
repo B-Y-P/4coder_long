@@ -326,7 +326,7 @@
 //- CODE
 // [ ] Compress jump highlight and error highlight into one
 // [ ] Change the margin style
-// [ ] Slider
+// [X] Slider
 
 //- Line Wrap/Overflow
 // [ ] Weird wrap postion
@@ -335,10 +335,10 @@
 // [ ] Overlap with line number margin
 
 //~ TODO Face Commands
-// [ ] Use the new query bar system
-// [ ] Up/Down to change the face size
-// [ ] Cap the input size
-// [ ] Change other related faces (global_small_code_face)
+// [X] Use the new query bar system
+// [X] Up/Down to change the face size
+// [X] Cap the input size
+// [X] Change other related faces (global_small_code_face)
 // [ ] Collapse down into two fonts: UI and Code
 
 //~ TODO MULTI CURSOR
@@ -377,18 +377,21 @@
 // https://discord.com/channels/657067375681863699/657318502012551190/1361868722347708597
 
 // [ ] Global Settings
-//     [ ] Cursor (mode, roundness, thickness, toggle mouse)
-//     [ ] Lister roundess
-//     [ ] Font size
+//     [X] Cursor (mode, roundness, thickness, toggle mouse)
+//     [X] Tooltip (roundness, thickness, padding)
+//     [X] Lister (roundness, margin)
+//     [X] Font size
 //     [X] use_xxx (filebar, error/jump/scope highlight, paren helper, comment keywords)
 //     [X] show_xxx (line number/offset, fps)
 //     [X] enable_xxx (output/code wrapping, undo fade, virtual whitespace)
+//     [X] Indentation (indent_with_tabs, indent_width, default_tab_width)
+//     [X] Long Config (long_code_peek_height, long_margin_size, long_global_show_whitespace)
 //     [ ] long_global_move_side
-//     [ ] long_lister_tooltip_peek
 //     [ ] Pos-Context: draw position and enable
+
 // [ ] Buffer Settings
-//     [ ] Whitespace Highlight
-//     [ ] File Bar
+//     [X] Whitespace Highlight
+//     [X] File Bar
 //     [ ] Font size
 //     [ ] Buffer Info (name, size, line/word/identifier count)
 
@@ -444,23 +447,6 @@
 // [ ] Modal auto-complete {} () [] on enter or typing
 // [ ] Code peek yank
 // [ ] Greedy lookup the binding commands
-
-//~ NOTE(long): @long_macros
-#define LONG_INDENT_STMNT 1
-#define LONG_INDEX_INLINE 1
-#define LONG_INDEX_INSERT_QUEUE 1
-#define LONG_INDENT_PAREN 0
-
-#define LONG_ENABLE_INDEX_PROFILE 0
-#define LONG_ENABLE_PROFILE 0
-
-#if LONG_ENABLE_INDEX_PROFILE
-#define Long_Index_ProfileScope(T, N) ProfileScope(T, N)
-#define Long_Index_ProfileBlock(T, N) ProfileBlock(T, N)
-#else
-#define Long_Index_ProfileScope(...)
-#define Long_Index_ProfileBlock(...)
-#endif
 
 //~ NOTE(long): @default_headers
 #include <string.h>
@@ -519,6 +505,27 @@
 #include "4coder_log_parser.h"
 #include "4coder_tutorial.h"
 #include "4coder_search_list.h"
+
+//~ NOTE(long): @long_macros
+#define LONG_INDENT_STMNT 1
+#define LONG_INDEX_INLINE 1
+#define LONG_INDEX_INSERT_QUEUE 1
+#define LONG_INDENT_PAREN 0
+
+#define LONG_ENABLE_INDEX_PROFILE 0
+#define LONG_ENABLE_PROFILE 0
+
+#if LONG_ENABLE_INDEX_PROFILE
+#define Long_Index_ProfileScope(T, N) ProfileScope(T, N)
+#define Long_Index_ProfileBlock(T, N) ProfileBlock(T, N)
+#else
+#define Long_Index_ProfileScope(...)
+#define Long_Index_ProfileBlock(...)
+#endif
+
+#define LONG_FONT_SIZE_RANGE (Range_i64{ 4, 64 })
+#define LONG_SMALL_FONT_SIZE_OFFSET 2
+StaticAssert(LONG_SMALL_FONT_SIZE_OFFSET < LONG_FONT_SIZE_RANGE.min);
 
 //~ NOTE(rjf): @f4_headers
 #include "4coder_fleury_ubiquitous.h"
@@ -872,12 +879,13 @@ CUSTOM_DOC("Long startup event")
         u32 pt_size = default_desc.parameters.pt_size;
         global_styled_title_face = Long_Font_TryCreate(app, roboto, default_font, pt_size + 3, 0, 0);
         global_styled_label_face = Long_Font_TryCreate(app, roboto, default_font, pt_size - 2, 1, 1);
-        global_small_code_face   = Long_Font_TryCreate(app, incons, default_font, pt_size - 2, 1, 1);
+        global_small_code_face   = Long_Font_TryCreate(app, incons, default_font, pt_size - LONG_SMALL_FONT_SIZE_OFFSET, 1, 1);
     }
     
     //- NOTE(rjf): Prep virtual whitespace.
     {
         def_enable_virtual_whitespace = def_get_config_b32_lit("enable_virtual_whitespace");
+        long_virtual_indent = def_get_config_u64_lit(app, "virtual_whitespace_regular_indent");
         clear_all_layouts(app);
     }
 }

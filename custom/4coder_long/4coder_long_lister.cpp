@@ -1,51 +1,60 @@
 
-function void Long_Lister_AddItem(Application_Links* app, Lister* lister, String8 name, String8 tag,
+function Long_Lister_Data* Long_Lister_AddItem(Lister* lister, String8 name, String8 tag)
+{
+    Long_Lister_Data* data = (Long_Lister_Data*)lister_add_item(lister, name, tag, 0, sizeof(Long_Lister_Data));
+    *data = {};
+    ((Lister_Node*)data - 1)->user_data = data;
+    return data;
+}
+
+function void Long_Lister_AddItem(Lister* lister, String8 name, String8 tag,
                                   Buffer_ID buffer, i64 pos, u64 index, String8 tooltip)
 {
-    Long_Lister_Data* data = (Long_Lister_Data*)lister_add_item(lister, name, tag, 0, sizeof(Long_Lister_Data));
-    *data = {};
-    data->type = buffer ? Long_Header_Location : Long_Header_None;
-    data->buffer = buffer;
-    data->pos = pos;
-    data->user_index = index;
+    Long_Lister_Data* data = Long_Lister_AddItem(lister, name, tag);
+    data->type = Long_Lister_Header;
+    data->id = buffer;
+    data->range = Ii64(pos);
+    data->user = index;
     data->tooltip = tooltip;
-    ((Lister_Node*)data - 1)->user_data = data;
 }
 
-function void Long_Lister_AddVars(Application_Links* app, Lister* lister, String8 name)
+function void Long_Lister_AddSwitch(Lister* lister, String8 name, Long_Item_Type type, u64 user)
 {
-    Long_Lister_Data* data = (Long_Lister_Data*)lister_add_item(lister, name, string_u8_empty, 0, sizeof(Long_Lister_Data));
-    *data = {};
-    data->type = Long_Content_Vars;
-    data->user_index = (i64)vars_save_string(name);
-    ((Lister_Node*)data - 1)->user_data = data;
+    Long_Lister_Data* data = Long_Lister_AddItem(lister, name, string_u8_empty);
+    data->type = Long_Lister_Switch;
+    data->item_type = type;
+    data->user = user;
 }
 
-function void Long_Lister_AddBuffer(Application_Links* app, Lister* lister, String8 name, String8 tag, Buffer_ID buffer)
+function void Long_Lister_AddSlider(Lister* lister, String8 name, Range_i64 range)
 {
-    Long_Lister_Data* data = (Long_Lister_Data*)lister_add_item(lister, name, tag, 0, sizeof(Long_Lister_Data));
-    *data = {};
-    //data->type = Long_Header_Path;
-    data->buffer = buffer;
-    ((Lister_Node*)data - 1)->user_data = data;
+    Long_Lister_Data* data = Long_Lister_AddItem(lister, name, string_u8_empty);
+    data->range = range;
+    data->type = Long_Lister_Slider;
+}
+
+global Long_Lister_Data long_nil_item = {};
+
+function Long_Lister_Data* Long_Lister_GetItem(Lister_Node* node)
+{
+    Long_Lister_Data* data = &long_nil_item;
+    if (node && node->user_data == node + 1)
+        data = (Long_Lister_Data*)node->user_data;
+    return data;
 }
 
 function String8 Long_Lister_GetHeaderString(Application_Links* app, Arena* arena, Lister_Node* node)
 {
     String8 result = {};
-    if (node->user_data == (node + 1))
+    Long_Lister_Data* data = Long_Lister_GetItem(node);
+    
+    if ((data->type & Long_Lister_Header) && data->id)
     {
-        Long_Lister_Data data = *(Long_Lister_Data*)(node + 1);
-        switch (data.type)
-        {
-            case Long_Header_Location:
-            {
-                String8 filename = push_buffer_unique_name(app, arena, data.buffer);
-                Buffer_Cursor cursor = buffer_compute_cursor(app, data.buffer, seek_pos(data.pos));
-                result = push_stringf(arena, "[%.*s:%d:%d] ", string_expand(filename), cursor.line, cursor.col);
-            } break;
-        }
+        String8 filename = push_buffer_unique_name(app, arena, (Buffer_ID)data->id);
+        Buffer_Cursor cursor = buffer_compute_cursor(app, (Buffer_ID)data->id, seek_pos(data->range.min));
+        result = push_stringf(arena, "[%.*s:%d:%d] ", string_expand(filename), cursor.line, cursor.col);
     }
+    
     return result;
 }
 
@@ -118,17 +127,19 @@ function void Long_Lister_RenderHUD(Long_Render_Context* ctx, Lister* lister, b3
     Rect_f32 list_rect = pair.max;
     Vec2_f32 list_size = rect_dim(list_rect);
     Lister_Node* current = lister->highlighted_node;
-    Long_Lister_Data* item_data = current ? (Long_Lister_Data*)current->user_data : 0;
+    Long_Lister_Data* curr_data = Long_Lister_GetItem(current);
     
     //- NOTE(long): Tooltip Check
-    if (item_data != (Long_Lister_Data*)(current+1) || !(long_lister_tooltip_peek & 0x80000000))
-        item_data = 0;
-    else if (long_lister_tooltip_peek == Long_Tooltip_NextToItem && !lister->set_vertical_focus_to_item)
+    b32 has_tooltip = long_lister_tooltip_peek & 0x80000000;
+    if (long_lister_tooltip_peek == Long_Tooltip_NextToItem && !lister->set_vertical_focus_to_item)
     {
         f32 item_y_pos = Long_Lister_PosFromVirtual(item_virtual_y);
         if (item_y_pos <= list_rect.y0 - block_height || item_y_pos >= list_rect.y1)
-            item_data = 0;
+            has_tooltip = 0;
     }
+    
+    if ((!curr_data->id && !curr_data->tooltip.size) || curr_data->item_type)
+        has_tooltip = 0;
     
     //- NOTE(long): Sizing Tooltip
     Rect_f32 screen_rect = global_get_screen_rectangle(app);
@@ -140,9 +151,9 @@ function void Long_Lister_RenderHUD(Long_Render_Context* ctx, Lister* lister, b3
     
     f32 under_item_padding = line_height;
     f32  next_item_padding = line_height * .5f;
-    if (item_data)
+    if (has_tooltip)
     {
-        if (item_data->tooltip.size)
+        if (curr_data->tooltip.size)
         {
             f32 under_total_padding = under_item_padding * 2;
             f32  next_total_padding =  next_item_padding * 2;
@@ -150,7 +161,7 @@ function void Long_Lister_RenderHUD(Long_Render_Context* ctx, Lister* lister, b3
             f32 max_width = list_size.x - under_total_padding;
             if (!under_item)
                 max_width = screen_extent + (screen_extent-list_size.x)*.5f - padding*2.f - next_total_padding;
-            block = Long_Render_LayoutString(ctx, scratch, item_data->tooltip, max_width);
+            block = Long_Render_LayoutString(ctx, scratch, curr_data->tooltip, max_width);
             tooltip_size = get_fancy_block_dim(app, face, &block);
             
             if (under_item)
@@ -270,7 +281,7 @@ function void Long_Lister_RenderHUD(Long_Render_Context* ctx, Lister* lister, b3
             highlight = UIHighlight_Active;
             
             //- NOTE(long): Item Tooltip
-            if (item_data)
+            if (has_tooltip)
             {
                 f32 x_pos = list_rect.x0;
                 if (!under_item)
@@ -289,14 +300,14 @@ function void Long_Lister_RenderHUD(Long_Render_Context* ctx, Lister* lister, b3
                 Long_Render_SetClip(app, under_item ? list_rect : tooltip_rect);
                 Long_Render_TooltipRect(app, tooltip_rect);
                 
-                if (item_data->tooltip.size)
+                if (curr_data->tooltip.size)
                 {
                     content_rect = rect_inner(content_rect, under_item ? under_item_padding : next_item_padding);
                     Rect_f32 content_clip = rect_intersect(content_rect, list_rect);
                     Long_Render_SetClip(app, under_item ? content_clip : content_rect);
                     draw_fancy_block(app, face, text_color, &block, content_rect.p0);
                 }
-                else Long_Render_DrawPeek(app, content_rect, item_data->buffer, Ii64(item_data->pos), 1);
+                else Long_Render_DrawPeek(app, content_rect, (Buffer_ID)curr_data->id, curr_data->range, 1);
             }
         }
         
@@ -310,14 +321,53 @@ function void Long_Lister_RenderHUD(Long_Render_Context* ctx, Lister* lister, b3
         Long_Render_BorderRect(app, item_outer, margin_size, lister_roundness,
                                Long_ARGBFromID(item_colors[highlight], 1), Long_ARGBFromID(item_colors[highlight], 0));
         
-        Long_Lister_Data* config = (Long_Lister_Data*)node->user_data;
-        if (config == (Long_Lister_Data*)(node + 1) && config->type == Long_Content_Vars)
+        Long_Lister_Data* item_data = Long_Lister_GetItem(node);
+        if (item_data->type == Long_Lister_Switch)
         {
-            b32 value = def_get_config_b32(config->user_index);
+            Rect_f32 switch_rect = rect_inner(item_inner, margin_size * 2);
+            switch_rect.x0 = switch_rect.x1 - rect_height(switch_rect) * 2.f;
             
+            b32 value = 0;
+            switch (item_data->item_type)
+            {
+                case Long_Item_Config: value = def_get_config_b32(vars_save_string(node->string)); break;
+                case Long_Item_Pointer: value = *(b32*)item_data->user; break;
+                
+                case Long_Item_Attachment:
+                {
+                    b32* ptr = scope_attachment(app, item_data->id, item_data->user, b32);
+                    if (ptr)
+                        value = *ptr;
+                } break;
+                
+                case Long_Item_ViewSetting:
+                {
+                    i64 v = (i64)value;
+                    view_get_setting(app, ctx->view, (View_Setting_ID)item_data->user, &v);
+                    value = (b32)v;
+                } break;
+            }
+            
+            String8 val_str = value ? S8Lit("true") : S8Lit("false");
+            Vec2_f32 val_pos = switch_rect.p0 - V2f32(get_string_advance(app, face, val_str) + text_offset, 0);
+            
+            Long_Render_Switch(app, switch_rect, value);
+            draw_string(app, face, val_str, val_pos, pop2_color);
+        }
+        
+        else if (item_data->type == Long_Lister_Slider)
+        {
             Rect_f32 slider_rect = rect_inner(item_inner, margin_size * 2);
-            slider_rect.x0 = slider_rect.x1 - rect_height(slider_rect) * 2.f;
-            Long_Render_SliderB32(app, slider_rect, value);
+            slider_rect.x0 = slider_rect.x1 - rect_height(slider_rect) * 10.f;
+            
+            String_ID config = vars_save_string(node->string);
+            u64 value = def_get_config_u64(app, config);
+            Range_i64 range = item_data->range;
+            Long_Render_Slider(app, slider_rect, unlerp(range.min, value, range.max));
+            
+            String8 val_str = def_get_config_string(scratch, config);
+            Vec2_f32 val_pos = slider_rect.p0 - V2f32(get_string_advance(app, face, val_str) + text_offset, 0);
+            draw_string(app, face, val_str, val_pos, pop2_color);
         }
         
         //- NOTE(long): Item Content
@@ -727,6 +777,7 @@ function Lister_Result Long_Lister_Run(Application_Links* app, Lister* lister, b
         
         Lister_Activation_Code result = ListerActivation_Continue;
         String8 text_field = lister->text_field.string;
+        Long_Lister_Data* data = Long_Lister_GetItem(lister->highlighted_node);
         b32 handled = 1;
         i32 dir = -1;
         
@@ -749,13 +800,51 @@ function Lister_Result Long_Lister_Run(Application_Links* app, Lister* lister, b
                         {
                             lister->item_index = 0;
                             lister_update_selection_values(lister);
+                            data = Long_Lister_GetItem(lister->highlighted_node);
                         }
                         
-                        void* user_data = 0;
-                        if (0 <= lister->raw_item_index && lister->raw_item_index < lister->options.count)
-                            user_data = lister_get_user_data(lister, lister->raw_item_index);
-                        lister_activate(app, lister, user_data, 0);
-                        result = ListerActivation_Finished;
+                        if (data->type == Long_Lister_Switch)
+                        {
+                            switch (data->item_type)
+                            {
+                                case Long_Item_Config: 
+                                {
+                                    String_ID config_id = vars_save_string(lister->highlighted_node->string);
+                                    def_set_config_b32(config_id, !def_get_config_b32(config_id));
+                                } break;
+                                
+                                case Long_Item_Pointer:
+                                {
+                                    b32* user = (b32*)data->user;
+                                    if (user)
+                                        *user = !*user;
+                                } break;
+                                
+                                case Long_Item_Attachment:
+                                {
+                                    b32* ptr = scope_attachment(app, data->id, data->user, b32);
+                                    if (ptr)
+                                        *ptr = !*ptr;
+                                } break;
+                                
+                                case Long_Item_ViewSetting:
+                                {
+                                    i64 value = 0;
+                                    View_Setting_ID setting = (View_Setting_ID)data->user;
+                                    if (view_get_setting(app, view, setting, &value))
+                                        view_set_setting(app, view, setting, !value);
+                                } break;
+                            }
+                        }
+                        
+                        else
+                        {
+                            void* user_data = 0;
+                            if (0 <= lister->raw_item_index && lister->raw_item_index < lister->options.count)
+                                user_data = lister_get_user_data(lister, lister->raw_item_index);
+                            lister_activate(app, lister, user_data, 0);
+                            result = ListerActivation_Finished;
+                        }
                     } break;
                     
                     case KeyCode_Backspace:
@@ -764,6 +853,53 @@ function Lister_Result Long_Lister_Run(Application_Links* app, Lister* lister, b
                             lister->handlers.backspace(app);
                         else
                             handled = 0;
+                    } break;
+                    
+                    case KeyCode_Right: dir = 1;
+                    case KeyCode_Left:
+                    {
+                        if (data->type == Long_Lister_Switch)
+                        {
+                            b32 value = dir > 0 ? 1 : 0;
+                            
+                            switch (data->item_type)
+                            {
+                                case Long_Item_Config: 
+                                {
+                                    String_ID config_id = vars_save_string(lister->highlighted_node->string);
+                                    def_set_config_b32(config_id, value);
+                                } break;
+                                
+                                case Long_Item_Pointer:
+                                {
+                                    b32* user = (b32*)data->user;
+                                    if (user)
+                                        *user = value;
+                                } break;
+                                
+                                case Long_Item_Attachment:
+                                {
+                                    b32* ptr = scope_attachment(app, data->id, data->user, b32);
+                                    if (ptr)
+                                        *ptr = value;
+                                } break;
+                                
+                                case Long_Item_ViewSetting:
+                                {
+                                    View_Setting_ID setting = (View_Setting_ID)data->user;
+                                    view_set_setting(app, view, setting, value);
+                                } break;
+                            }
+                        }
+                        
+                        else if (data->type == Long_Lister_Slider)
+                        {
+                            String_ID config_id = vars_save_string(lister->highlighted_node->string);
+                            u64 value = def_get_config_u64(app, config_id) + dir;
+                            def_set_config_u64(app, config_id, clamp(data->range.min, (i64)value, data->range.max));
+                        }
+                        
+                        else handled = 0;
                     } break;
                     
                     case KeyCode_Down: dir = 1;
@@ -801,7 +937,23 @@ function Lister_Result Long_Lister_Run(Application_Links* app, Lister* lister, b
             {
                 switch (in.event.mouse.code)
                 {
-                    case MouseCode_Left: lister->hot_user_data = lister_user_data_at_p(app, view, lister, V2f32(in.event.mouse.p)); break;
+                    case MouseCode_Left:
+                    {
+                        // TODO(long): Fix Bug
+                        lister->hot_user_data = lister_user_data_at_p(app, view, lister, V2f32(in.event.mouse.p));
+                        
+                        if (data->type == Long_Lister_Switch)
+                        {
+                            String_ID config_id = vars_save_string(lister->highlighted_node->string);
+                            def_set_config_b32(config_id, !def_get_config_b32(config_id));
+                            lister->hot_user_data = 0;
+                            // TODO(long): Other item types
+                        }
+                        
+                        // TODO(long): Drag left-right to change slider
+                        //else if (data->type == Long_Lister_Slider)
+                    } break;
+                    
                     default: handled = 0; break;
                 }
             } break;
@@ -840,27 +992,7 @@ function Lister_Result Long_Lister_Run(Application_Links* app, Lister* lister, b
         }
         
         if (result == ListerActivation_Finished)
-        {
-#if 0
-            Long_Lister_Data* data = (Long_Lister_Data*)lister->out.user_data;
-            
-            // @COPYPASTA(long): lister_get_user_data
-            Lister_Node* node = lister->options.first;
-            for (; node; node = node->next)
-                if (data == node->user_data)
-                    break;
-            
-            if (data == (Long_Lister_Data*)(node + 1) && data->type == Long_Content_Vars)
-            {
-                String_ID config_id = (String_ID)data->user_index;
-                def_set_config_b32(config_id, !def_get_config_b32(config_id));
-            }
-            else break;
-            
-#else
             break;
-#endif
-        }
         
         if (!handled)
         {

@@ -18,7 +18,7 @@ function void Long_Binding_SetupEssential(Mapping* mapping)
     BindCore(long_try_exit, CoreCode_TryExit);
     Bind(exit_4coder, KeyCode_F4, KeyCode_Alt);
     BindMouseWheel(mouse_wheel_scroll);
-    BindMouseWheel(mouse_wheel_change_face_size, KeyCode_Control);
+    BindMouseWheel(long_mouse_wheel_change_face_size, KeyCode_Control);
     
     SelectMap(file_id);
     ParentMap(global_id);
