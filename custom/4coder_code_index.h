@@ -46,7 +46,9 @@ enum{
     CodeIndexNote_Type,
     CodeIndexNote_Function,
     CodeIndexNote_Macro,
-    CodeIndexNote_4coderCommand,
+    CodeIndexNote_Enum,
+    CodeIndexNote_Global,
+    CodeIndexNote_COUNT,
 };
 
 struct Code_Index_Note{

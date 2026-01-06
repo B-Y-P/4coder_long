@@ -475,6 +475,7 @@
 #include "4coder_token.h"
 #include "generated/lexer_cpp.h"
 #include "generated/lexer_cs.h"
+#include "generated/lexer_odin.h"
 
 #include "4coder_variables.h"
 #include "4coder_audio.h"
@@ -582,6 +583,7 @@ StaticAssert(LONG_SMALL_FONT_SIZE_OFFSET < LONG_FONT_SIZE_RANGE.min);
 #include "4coder_token.cpp"
 #include "generated/lexer_cpp.cpp"
 #include "generated/lexer_cs.cpp"
+#include "generated/lexer_odin.cpp"
 
 #include "4coder_default_framework_variables.cpp"
 #include "4coder_default_colors.cpp"

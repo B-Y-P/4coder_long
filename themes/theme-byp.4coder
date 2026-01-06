@@ -50,6 +50,8 @@ defcolor_function                   =  0xFFBDA3F9;
 defcolor_type                       =  0xFFB84AFD;
 defcolor_primitive                  =  0xFFB84AFD;
 defcolor_macro                      =  0xFF579EA8;
+defcolor_enum                       =  0xFF9ad0f7;
+defcolor_global                     =  0xFF20A4C7;
 defcolor_control                    =  defcolor_preproc;
 defcolor_struct                     =  defcolor_keyword;
 defcolor_non_text                   =  0xFFDAAEFE;
@@ -73,9 +75,9 @@ fleury_color_index_product_type    = defcolor_type;
 fleury_color_index_sum_type        = defcolor_type;
 fleury_color_index_function        = defcolor_function;
 fleury_color_index_macro           = defcolor_macro;
-fleury_color_index_constant        = defcolor_macro;
+fleury_color_index_constant        = defcolor_enum;
 fleury_color_index_comment_tag     = 0xffff0000;
-fleury_color_index_decl            = 0xFF2299FF;
+fleury_color_index_decl            = defcolor_global;
 fleury_color_cursor_macro          = defcolor_bar;
 fleury_color_cursor_power_mode     = defcolor_bar;
 fleury_color_cursor_inactive       = 0xFF8E2DE2;
@@ -86,3 +88,14 @@ fleury_color_error_annotation      = 0xffff0000;
 fleury_color_lego_grab             = 0xffefaf6f;
 fleury_color_lego_splat            = 0xffefaaef;
 fleury_color_comment_user_name     = defcolor_keyword;
+
+//~ NOTE(long): Custom index colors
+long_color_index_local                  = 0xFF10FFFF;
+long_color_index_param                  = long_color_index_local;
+long_color_index_field                  = defcolor_text_default;
+
+//~ NOTE(long): Custom Slider colors
+long_color_slider_back                  = { 0xFF1A1A1A, 0xFF2C5B36 };
+long_color_slider_pop                   = { 0xFF355B6E };
+long_color_slider_border                = { 0xFF424242, 0xFF568761 };
+long_color_slider_text                  = { 0xFFA4A4A4, 0xFFE3F5D3 };

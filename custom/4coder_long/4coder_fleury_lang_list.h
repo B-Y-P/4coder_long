@@ -8,6 +8,7 @@
 #include "4coder_fleury_lang_metadesk.cpp"
 #include "4coder_long_lang_cs.cpp"
 #include "4coder_long_lang_cpp.cpp"
+#include "4coder_long_lang_odin.cpp"
 
 // NOTE(rjf): @f4_register_languages Register languages.
 function void F4_RegisterLanguages(void)
@@ -27,6 +28,11 @@ function void F4_RegisterLanguages(void)
     F4_RegisterLanguage(S8Lit("cs"), Long_CS_IndexFile, lex_full_input_cs_init, lex_full_input_cs_breaks,
                         Long_CS_PosContext, Long_CS_Highlight, Lex_State_Cs);
     
+    // NOTE(BYP): odin from https://github.com/B-Y-P/4coder_qol/tree/odin
+    F4_RegisterLanguage(S8Lit("odin"), Long_Odin_IndexFile, lex_full_input_odin_init, lex_full_input_odin_breaks,
+                        Long_Odin_PosContext, Long_Odin_Highlight, Lex_State_Odin);
+    
+
     // NOTE(rjf): Metadesk
     String8 md_exts[] =
     {

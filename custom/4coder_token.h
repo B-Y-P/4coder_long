@@ -25,8 +25,10 @@ enum{
     TokenBaseKind_ParentheticalOpen = 13,
     TokenBaseKind_ParentheticalClose = 14,
     TokenBaseKind_StatementClose = 15,
-    
-    TokenBaseKind_COUNT = 16,
+    qol_TokenKind_Primitive = 16,
+    qol_TokenKind_Control = 17,
+    qol_TokenKind_Struct = 18,
+    TokenBaseKind_COUNT = 19,
 };
 
 char *token_base_kind_names[] ={
@@ -45,7 +47,10 @@ char *token_base_kind_names[] ={
     "ScopeClose",
     "ParentheticalOpen",
     "ParentheticalClose",
-    "StatementClose"
+    "StatementClose",
+    "Primitive",
+    "Control",
+    "Struct"
 };
 
 typedef u16 Token_Base_Flag;
