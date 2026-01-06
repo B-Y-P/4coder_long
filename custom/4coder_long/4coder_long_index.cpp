@@ -381,6 +381,7 @@ function void Long_Index_Tick(Application_Links* app)
         F4_Index_Unlock();
         buffer_clear_layout_cache(app, buffer_id);
     }
+    buffer_modified_set_clear();
 }
 
 // @COPYPASTA(long): _F4_Index_FreeNoteTree
